@@ -1,4 +1,4 @@
-import { systemInfo, ctx, resourceManager } from '../../game.js';
+import { systemInfo, ctx, resourceManager } from '../core/context.js';
 
 const startButton = {
   x: 0,
@@ -8,6 +8,11 @@ const startButton = {
 };
 
 export const startScene = {
+  started: false,
+  highestScore: 0,
+  update() {
+    
+  },
   draw() {
     ctx.clearRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
 
@@ -48,21 +53,42 @@ export const startScene = {
     const titleY = popupY - popupHeight * 0.25;
     ctx.drawImage(title, titleX, titleY, titleWidth, titleHeight);
 
-    // 6. Draw start button
+    // 6. Draw start button and text
     const startButtonWidth = popupWidth * 0.8;
     const startButtonHeight = startButtonWidth * (startButtonImg.height / startButtonImg.width);
     const startButtonX = (systemInfo.windowWidth - startButtonWidth) / 2;
-    const startButtonY = titleY + titleHeight + 30;
+    const startButtonY = titleY + titleHeight;
     ctx.drawImage(startButtonImg, startButtonX, startButtonY, startButtonWidth, startButtonHeight);
+
+    // Draw text on the button
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 4;
+    ctx.strokeText('开始游戏', startButtonX + startButtonWidth / 2, startButtonY + startButtonHeight / 2);
+    ctx.fillText('开始游戏', startButtonX + startButtonWidth / 2, startButtonY + startButtonHeight / 2);
+
 
     // 7. Update button coordinates for hit detection
     startButton.x = startButtonX;
     startButton.y = startButtonY;
     startButton.width = startButtonWidth;
     startButton.height = startButtonHeight;
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(`历史最高积分：${this.highestScore}`, systemInfo.windowWidth / 2, startButtonY + startButtonHeight + 20);
+    ctx.fillText(`历史最高积分：${this.highestScore}`, systemInfo.windowWidth / 2, startButtonY + startButtonHeight + 20);
   },
 
   onTouchStart(touches, switchScene) {
+    if (this.started) return;
     const touch = touches[0];
     if (
       touch.clientX >= startButton.x &&
@@ -70,9 +96,22 @@ export const startScene = {
       touch.clientY >= startButton.y &&
       touch.clientY <= startButton.y + startButton.height
     ) {
-      console.log('游戏开始');
-      // 切换到游戏场景
+      this.started = true;
       switchScene('game');
     }
+  },
+  onTouchMove(touches) {
+    
+  },
+  onTouchEnd(touches) {
+    
+  },
+  initialize() {
+    try {
+      const saved = tt.getStorageSync('highestScore');
+      if (typeof saved === 'number') {
+        this.highestScore = saved;
+      }
+    } catch (_) {}
   },
 };

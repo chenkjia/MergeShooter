@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Shooter - 底部按钮功能测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        .game-container {
+            width: 375px;
+            height: 667px;
+            margin: 0 auto;
+            background: #333;
+            position: relative;
+            border: 2px solid #000;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Merge Shooter - 底部按钮功能测试</h1>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="375" height="667"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button onclick="addGold()">增加金币 (+1000)</button>
+        <button onclick="simulateButton2()">模拟第二个按钮点击</button>
+        <button onclick="resetGame()">重置游戏</button>
+    </div>
+    
+    <div class="status">
+        <h3>游戏状态</h3>
+        <div id="gameStatus">
+            <p>金币: <span id="gold">1000</span></p>
+            <p>坦克数量: <span id="tankCount">2</span></p>
+            <p>波次: <span id="wave">0</span></p>
+            <p>分数: <span id="score">0</span></p>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>使用说明</h3>
+        <ul>
+            <li><strong>底部四个按钮：</strong>已在游戏中实现，可以直接点击</li>
+            <li><strong>第二个按钮（紫色，2000金币）：</strong>点击后在等待区域生成新坦克</li>
+            <li><strong>拖拽坦克：</strong>可以用鼠标拖拽坦克到不同区域</li>
+            <li><strong>垃圾桶：</strong>在右上角，拖拽坦克到垃圾桶可以售卖</li>
+            <li><strong>增加金币按钮：</strong>用于测试购买功能</li>
+        </ul>
+    </div>
+
+    <script>
+        // 获取Canvas和Context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 游戏状态
+        let gameState = {
+            gold: 1000,
+            wave: 0,
+            score: 0,
+            tanks: [],
+            bottomButtons: [],
+            dragging: false,
+            dragIndex: -1,
+            dragOffsetX: 0,
+            dragOffsetY: 0
+        };
+
+        // 游戏区域定义
+        const battleArea = {
+            x: canvas.width * 0.05,
+            y: canvas.height * 0.1,
+            width: canvas.width * 0.9,
+            height: canvas.height * 0.55,
+        };
+
+        const mergeArea = {
+            x: canvas.width * 0.05,
+            y: canvas.height * 0.7,
+            width: canvas.width * 0.9,
+            height: canvas.height * 0.2,
+        };
+
+        const trashArea = {
+            x: canvas.width * 0.85,
+            y: canvas.height * 0.15,
+            width: 60,
+            height: 60,
+        };
+
+        // 坦克类
+        class Tank {
+            constructor(level, x, y) {
+                this.level = level;
+                this.x = x;
+                this.y = y;
+                this.width = 50;
+                this.height = 50;
+                this.attack = 10 * level;
+                this.health = 100 * level;
+                this.range = 150;
+            }
+
+            draw() {
+                // 绘制坦克
+                ctx.fillStyle = this.getTankColor();
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // 绘制等级标识
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.level, this.x + this.width / 2, this.y + this.height / 2);
+            }
+
+            getTankColor() {
+                const colors = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336', '#00BCD4', '#795548', '#607D8B', '#E91E63', '#3F51B5'];
+                return colors[this.level - 1] || colors[0];
+            }
+
+            isTouched(touch) {
+                return (
+                    touch.x >= this.x &&
+                    touch.x <= this.x + this.width &&
+                    touch.y >= this.y &&
+                    touch.y <= this.y + this.height
+                );
+            }
+        }
+
+        // 初始化底部按钮
+        function initializeBottomButtons() {
+            const buttonWidth = 80;
+            const buttonHeight = 60;
+            const spacing = 20;
+            const startX = canvas.width * 0.05;
+            const startY = canvas.height * 0.92 - buttonHeight;
+
+            gameState.bottomButtons = [
+                {
+                    x: startX,
+                    y: startY,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    color: '#FF8C00',
+                    text: '📦',
+                    type: 'shop',
+                    cost: 0
+                },
+                {
+                    x: startX + (buttonWidth + spacing),
+                    y: startY,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    color: '#9370DB',
+                    text: '2000',
+                    icon: '⚗️',
+                    type: 'spawn_tank',
+                    cost: 2000
+                },
+                {
+                    x: startX + (buttonWidth + spacing) * 2,
+                    y: startY,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    color: '#32CD32',
+                    text: '2300',
+                    type: 'upgrade',
+                    cost: 2300
+                },
+                {
+                    x: startX + (buttonWidth + spacing) * 3,
+                    y: startY,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    color: '#4169E1',
+                    text: '☕',
+                    type: 'energy',
+                    cost: 0
+                }
+            ];
+        }
+
+        // 绘制底部按钮
+        function drawBottomButtons() {
+            gameState.bottomButtons.forEach(button => {
+                // 绘制按钮背景
+                ctx.fillStyle = button.color;
+                ctx.fillRect(button.x, button.y, button.width, button.height);
+                
+                // 绘制按钮边框
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(button.x, button.y, button.width, button.height);
+                
+                // 绘制按钮文本
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 14px Arial';
+                
+                if (button.icon) {
+                    ctx.font = '16px Arial';
+                    ctx.fillText(button.icon, button.x + button.width / 2 - 15, button.y + button.height / 2);
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText(button.text, button.x + button.width / 2 + 10, button.y + button.height / 2);
+                } else {
+                    ctx.fillText(button.text, button.x + button.width / 2, button.y + button.height / 2);
+                }
+            });
+        }
+
+        // 绘制垃圾桶
+        function drawTrashArea() {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(trashArea.x, trashArea.y, trashArea.width, trashArea.height);
+            
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(trashArea.x, trashArea.y, trashArea.width, trashArea.height);
+            
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('🗑️', trashArea.x + trashArea.width / 2, trashArea.y + trashArea.height / 2);
+        }
+
+        // 处理底部按钮点击
+        function handleBottomButtonClick(button) {
+            switch (button.type) {
+                case 'spawn_tank':
+                    spawnNewTank();
+                    break;
+                case 'shop':
+                    console.log('打开商店');
+                    break;
+                case 'upgrade':
+                    if (gameState.gold >= button.cost) {
+                        gameState.gold -= button.cost;
+                        console.log('执行升级');
+                    } else {
+                        console.log('金币不足');
+                    }
+                    break;
+                case 'energy':
+                    console.log('使用能量饮料');
+                    break;
+            }
+            updateStatus();
+        }
+
+        // 生成新坦克
+        function spawnNewTank() {
+            const cost = 2000;
+            if (gameState.gold < cost) {
+                console.log('金币不足，无法生成坦克');
+                return;
+            }
+
+            const gridSize = 50;
+            const maxCols = Math.floor(mergeArea.width / gridSize);
+            const maxRows = Math.floor(mergeArea.height / gridSize);
+            
+            let spawnX, spawnY;
+            let attempts = 0;
+            const maxAttempts = 50;
+            
+            do {
+                const col = Math.floor(Math.random() * maxCols);
+                const row = Math.floor(Math.random() * maxRows);
+                spawnX = mergeArea.x + col * gridSize;
+                spawnY = mergeArea.y + row * gridSize;
+                attempts++;
+            } while (attempts < maxAttempts && isPositionOccupied(spawnX, spawnY));
+
+            if (attempts >= maxAttempts) {
+                console.log('无法找到合适的位置生成坦克');
+                return;
+            }
+
+            gameState.gold -= cost;
+            const newTank = new Tank(1, spawnX, spawnY);
+            gameState.tanks.push(newTank);
+            
+            console.log('成功生成新坦克');
+            updateStatus();
+        }
+
+        // 检查位置是否被占用
+        function isPositionOccupied(x, y) {
+            return gameState.tanks.some(tank => 
+                Math.abs(tank.x - x) < 50 && Math.abs(tank.y - y) < 50
+            );
+        }
+
+        // 更新状态显示
+        function updateStatus() {
+            document.getElementById('gold').textContent = gameState.gold;
+            document.getElementById('tankCount').textContent = gameState.tanks.length;
+            document.getElementById('wave').textContent = gameState.wave;
+            document.getElementById('score').textContent = gameState.score;
+        }
+
+        // 处理触摸/鼠标事件
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = {
+                x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+                y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+            };
+
+            // 检查底部按钮点击
+            for (let i = 0; i < gameState.bottomButtons.length; i++) {
+                const button = gameState.bottomButtons[i];
+                if (touch.x >= button.x && touch.x <= button.x + button.width &&
+                    touch.y >= button.y && touch.y <= button.y + button.height) {
+                    handleBottomButtonClick(button);
+                    return;
+                }
+            }
+
+            // 检查坦克拖拽
+            for (let i = gameState.tanks.length - 1; i >= 0; i--) {
+                const tank = gameState.tanks[i];
+                if (tank.isTouched(touch)) {
+                    gameState.dragging = true;
+                    gameState.dragIndex = i;
+                    gameState.dragOffsetX = touch.x - tank.x;
+                    gameState.dragOffsetY = touch.y - tank.y;
+                    break;
+                }
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (!gameState.dragging) return;
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = {
+                x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+                y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+            };
+
+            const tank = gameState.tanks[gameState.dragIndex];
+            const nx = touch.x - gameState.dragOffsetX;
+            const ny = touch.y - gameState.dragOffsetY;
+            const gridSize = 50;
+            const sx = Math.round(nx / gridSize) * gridSize;
+            const sy = Math.round(ny / gridSize) * gridSize;
+            tank.x = sx;
+            tank.y = sy;
+        }
+
+        function handleTouchEnd(e) {
+            if (!gameState.dragging) return;
+            
+            const tank = gameState.tanks[gameState.dragIndex];
+            gameState.dragging = false;
+            gameState.dragIndex = -1;
+
+            // 检查是否拖拽到垃圾桶
+            const inTrash = tank.x >= trashArea.x &&
+                           tank.x + tank.width <= trashArea.x + trashArea.width &&
+                           tank.y >= trashArea.y &&
+                           tank.y + tank.height <= trashArea.y + trashArea.height;
+
+            if (inTrash) {
+                const sellPrice = tank.level * 100;
+                gameState.gold += sellPrice;
+                gameState.tanks = gameState.tanks.filter(t => t !== tank);
+                console.log(`售卖了等级${tank.level}的坦克，获得${sellPrice}金币`);
+                updateStatus();
+                return;
+            }
+        }
+
+        // 游戏循环
+        function gameLoop() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制游戏区域
+            ctx.strokeStyle = '#3A7';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(battleArea.x, battleArea.y, battleArea.width, battleArea.height);
+            
+            ctx.strokeStyle = '#A73';
+            ctx.strokeRect(mergeArea.x, mergeArea.y, mergeArea.width, mergeArea.height);
+
+            // 绘制游戏元素
+            gameState.tanks.forEach(tank => tank.draw());
+            drawBottomButtons();
+            drawTrashArea();
+
+            // 绘制状态信息
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(\`金币: \${gameState.gold}\`, 12, 10);
+            ctx.fillText(\`坦克: \${gameState.tanks.length}\`, 12, 35);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 初始化游戏
+        function initGame() {
+            // 添加初始坦克
+            gameState.tanks.push(new Tank(1, 100, 300));
+            gameState.tanks.push(new Tank(2, 200, 350));
+            
+            initializeBottomButtons();
+            updateStatus();
+            gameLoop();
+        }
+
+        // 全局函数供按钮调用
+        window.addGold = function() {
+            gameState.gold += 1000;
+            updateStatus();
+        };
+
+        window.simulateButton2 = function() {
+            const button2 = gameState.bottomButtons[1];
+            if (button2) {
+                handleBottomButtonClick(button2);
+            }
+        };
+
+        window.resetGame = function() {
+            gameState = {
+                gold: 1000,
+                wave: 0,
+                score: 0,
+                tanks: [],
+                bottomButtons: [],
+                dragging: false,
+                dragIndex: -1,
+                dragOffsetX: 0,
+                dragOffsetY: 0
+            };
+            initGame();
+        };
+
+        // 添加事件监听器
+        canvas.addEventListener('mousedown', handleTouchStart);
+        canvas.addEventListener('mousemove', handleTouchMove);
+        canvas.addEventListener('mouseup', handleTouchEnd);
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', handleTouchEnd);
+
+        // 启动游戏
+        initGame();
+    </script>
+</body>
+</html>

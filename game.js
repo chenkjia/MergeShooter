@@ -1,49 +1,6 @@
 import { startScene } from './src/scenes/startScene.js';
 import { gameScene } from './src/scenes/gameScene.js';
-
-export const systemInfo = tt.getSystemInfoSync();
-export const canvas = tt.createCanvas();
-export const ctx = canvas.getContext('2d');
-canvas.width = systemInfo.windowWidth;
-canvas.height = systemInfo.windowHeight;
-
-const resources = {
-  mainBg: 'src/assets/ui/game_area_bg.png',
-  popupBg: 'src/assets/ui/popup_main_bg.png',
-  title: 'src/assets/ui/title.png',
-  startButton: 'src/assets/ui/start_game_btn.png',
-  monster1: 'src/assets/monsters/monster01.png',
-};
-
-export const resourceManager = {
-  images: {},
-  load(callback) {
-    const imagePaths = Object.values(resources);
-    const imageKeys = Object.keys(resources);
-    let loadedCount = 0;
-
-    if (imagePaths.length === 0) {
-      callback();
-      return;
-    }
-
-    imagePaths.forEach((path, index) => {
-      const key = imageKeys[index];
-      const image = tt.createImage();
-      image.src = path;
-      image.onload = () => {
-        this.images[key] = image;
-        loadedCount++;
-        if (loadedCount === imagePaths.length) {
-          callback();
-        }
-      };
-      image.onerror = (err) => {
-        console.error(`图片加载失败: ${path}`, err);
-      };
-    });
-  }
-};
+import { systemInfo, canvas, ctx, resourceManager } from './src/core/context.js';
 
 const sceneManager = {
   scenes: {
@@ -76,10 +33,28 @@ const sceneManager = {
       this.activeScene.onTouchStart(touches, this.switchScene.bind(this));
     }
   },
+  onTouchMove(touches) {
+    if (this.activeScene && typeof this.activeScene.onTouchMove === 'function') {
+      this.activeScene.onTouchMove(touches);
+    }
+  },
+  onTouchEnd(touches) {
+    if (this.activeScene && typeof this.activeScene.onTouchEnd === 'function') {
+      this.activeScene.onTouchEnd(touches);
+    }
+  },
 };
 
 tt.onTouchStart(({ touches }) => {
   sceneManager.onTouchStart(touches);
+});
+
+tt.onTouchMove(({ touches }) => {
+  sceneManager.onTouchMove(touches);
+});
+
+tt.onTouchEnd(({ touches }) => {
+  sceneManager.onTouchEnd(touches);
 });
 
 function gameLoop() {

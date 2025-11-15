@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Shooter - 游戏测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        .game-container {
+            width: 375px;
+            height: 667px;
+            margin: 0 auto;
+            background: #333;
+            position: relative;
+            border: 2px solid #000;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Merge Shooter - 游戏功能测试</h1>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="375" height="667"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button onclick="addGold()">增加金币 (+1000)</button>
+        <button onclick="simulateButton2()">模拟第二个按钮点击</button>
+        <button onclick="resetGame()">重置游戏</button>
+    </div>
+    
+    <div class="status">
+        <h3>游戏状态</h3>
+        <div id="gameStatus">
+            <p>金币: <span id="gold">1000</span></p>
+            <p>坦克数量: <span id="tankCount">2</span></p>
+            <p>波次: <span id="wave">0</span></p>
+            <p>分数: <span id="score">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 模拟 tt 对象
+        const tt = {
+            getSystemInfoSync: () => ({
+                windowWidth: 375,
+                windowHeight: 667
+            }),
+            createCanvas: () => document.getElementById('gameCanvas'),
+            createImage: () => new Image(),
+            getStorageSync: (key) => {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            },
+            setStorageSync: (key, value) => {
+                localStorage.setItem(key, JSON.stringify(value));
+            },
+            onTouchStart: (callback) => {
+                document.getElementById('gameCanvas').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = e.target.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: touch.clientX - rect.left,
+                            clientY: touch.clientY - rect.top
+                        }]
+                    });
+                });
+            },
+            onTouchMove: (callback) => {
+                document.getElementById('gameCanvas').addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = e.target.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: touch.clientX - rect.left,
+                            clientY: touch.clientY - rect.top
+                        }]
+                    });
+                });
+            },
+            onTouchEnd: (callback) => {
+                document.getElementById('gameCanvas').addEventListener('touchend', (callback));
+            }
+        };
+
+        // 全局变量
+        window.tt = tt;
+
+        // 模拟资源加载
+        const originalLoad = (callback) => {
+            console.log('资源加载完成');
+            callback();
+        };
+
+        // 加载游戏脚本
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.innerHTML = `
+            import { systemInfo, canvas, ctx, resourceManager } from './src/core/context.js';
+            import { startScene } from './src/scenes/startScene.js';
+            import { gameScene } from './src/scenes/gameScene.js';
+
+            // 重写资源管理器的load方法
+            resourceManager.load = ${originalLoad.toString()};
+
+            const sceneManager = {
+                scenes: {
+                    start: startScene,
+                    game: gameScene,
+                },
+                activeScene: null,
+                switchScene(sceneName) {
+                    if (this.scenes[sceneName]) {
+                        this.activeScene = this.scenes[sceneName];
+                        if (typeof this.activeScene.initialize === 'function') {
+                            this.activeScene.initialize();
+                        }
+                    } else {
+                        console.error(\`场景不存在: \${sceneName}\`);
+                    }
+                },
+                update() {
+                    if (this.activeScene && typeof this.activeScene.update === 'function') {
+                        this.activeScene.update();
+                    }
+                },
+                draw() {
+                    if (this.activeScene && typeof this.activeScene.draw === 'function') {
+                        this.activeScene.draw();
+                    }
+                },
+                onTouchStart(touches) {
+                    if (this.activeScene && typeof this.activeScene.onTouchStart === 'function') {
+                        this.activeScene.onTouchStart(touches, this.switchScene.bind(this));
+                    }
+                },
+                onTouchMove(touches) {
+                    if (this.activeScene && typeof this.activeScene.onTouchMove === 'function') {
+                        this.activeScene.onTouchMove(touches);
+                    }
+                },
+                onTouchEnd(touches) {
+                    if (this.activeScene && typeof this.activeScene.onTouchEnd === 'function') {
+                        this.activeScene.onTouchEnd(touches);
+                    }
+                },
+            };
+
+            tt.onTouchStart(({ touches }) => {
+                sceneManager.onTouchStart(touches);
+            });
+
+            tt.onTouchMove(({ touches }) => {
+                sceneManager.onTouchMove(touches);
+            });
+
+            tt.onTouchEnd(({ touches }) => {
+                sceneManager.onTouchEnd(touches);
+            });
+
+            function gameLoop() {
+                sceneManager.update();
+                sceneManager.draw();
+                requestAnimationFrame(gameLoop);
+            }
+
+            // 启动游戏
+            resourceManager.load(() => {
+                sceneManager.switchScene('game');
+                gameLoop();
+                
+                // 更新状态显示
+                setInterval(() => {
+                    updateStatus();
+                }, 1000);
+            });
+
+            // 更新状态显示
+            function updateStatus() {
+                const gameState = gameScene.activeScene === gameScene ? gameScene.gameState : null;
+                if (gameState) {
+                    document.getElementById('gold').textContent = gameState.gold || 0;
+                    document.getElementById('tankCount').textContent = gameState.tanks ? gameState.tanks.length : 0;
+                    document.getElementById('wave').textContent = gameState.wave || 0;
+                    document.getElementById('score').textContent = gameState.score || 0;
+                }
+            }
+
+            // 全局函数供按钮调用
+            window.addGold = function() {
+                if (gameScene.gameState) {
+                    gameScene.gameState.gold += 1000;
+                    updateStatus();
+                }
+            };
+
+            window.simulateButton2 = function() {
+                if (gameScene.gameState && gameScene.gameState.bottomButtons) {
+                    const button2 = gameScene.gameState.bottomButtons[1];
+                    if (button2) {
+                        gameScene.handleBottomButtonClick(button2);
+                        updateStatus();
+                    }
+                }
+            };
+
+            window.resetGame = function() {
+                sceneManager.switchScene('game');
+                updateStatus();
+            };
+
+            // 使游戏状态可访问
+            window.gameScene = gameScene;
+            window.sceneManager = sceneManager;
+        `;
+        
+        document.body.appendChild(script);
+
+        // 鼠标事件支持（用于桌面测试）
+        const canvas = document.getElementById('gameCanvas');
+        let isDragging = false;
+        let dragStart = null;
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const touch = {
+                clientX: e.clientX - rect.left,
+                clientY: e.clientY - rect.top
+            };
+            
+            // 模拟触摸开始
+            if (window.sceneManager) {
+                window.sceneManager.onTouchStart([touch]);
+            }
+            isDragging = true;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = {
+                clientX: e.clientX - rect.left,
+                clientY: e.clientY - rect.top
+            };
+            
+            // 模拟触摸移动
+            if (window.sceneManager) {
+                window.sceneManager.onTouchMove([touch]);
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            // 模拟触摸结束
+            if (window.sceneManager) {
+                window.sceneManager.onTouchEnd([]);
+            }
+        });
+    </script>
+</body>
+</html>
