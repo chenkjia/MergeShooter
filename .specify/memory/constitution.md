@@ -1,50 +1,53 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# 跨平台小游戏开发章程
 
-## Core Principles
+## 核心原则
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### 一、 高质量与可维护的代码
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+- **统一语言标准**: 项目统一使用现代 JavaScript (ES6+) 进行开发，以利用其最新特性提高代码可读性和效率。
+- **模块化设计**: 所有功能都应拆分为高内聚、低耦合的模块。核心游戏逻辑、UI组件和平台适配层必须清晰分离。
+- **代码风格一致性**: 引入并强制使用 ESLint 等代码检查工具，遵循统一的、严格的编码规范，确保代码风格一致。
+- **清晰的命名**: 变量、函数、类和文件名必须遵循统一的命名约定（例如，驼峰式命名法），做到见名知意。
+- **中文注释**: 项目所有代码注释（包括块注释、行内注释、JSDoc等）必须使用中文编写，以提高代码的可读性和团队协作效率。
+- **状态管理**: 对于复杂、多步骤的逻辑（如战斗流程、新手引导），应优先使用有限状态机（FSM）进行建模和管理，以确保逻辑的清晰性和可预测性。项目统一使用 XState 作为状态管理库，严禁引入或使用 Redux。
+- **函数式编程**: 鼓励采用函数式编程范式，以增强代码的健壮性和可维护性。
+    - **纯函数优先**: 核心逻辑和数据处理函数应尽可能设计为纯函数（Pure Functions），即相同的输入始终返回相同的输出，且无任何副作用。
+    - **不可变性 (Immutability)**: 避免直接修改对象或数组。对于状态的变更，应返回一个新的对象或数组，而不是在原地修改。
+    - **避免副作用 (Side Effects)**: 将带有副作用的代码（如网络请求、DOM 操作、日志记录）与核心纯逻辑分离，集中管理。
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### 二、 统一的跨平台适配层
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+- **API 隔离**: 严禁在核心游戏逻辑和UI层直接调用任何平台相关的 API（如 `wx.*` 或 `tt.*`）。
+- **统一适配器**: 所有的平台能力调用（如登录、支付、分享、广告、文件系统等）都必须通过项目中的 `adapter.js` 适配层进行。
+- **优雅降级**: 当某个功能在一个平台上不可用时，适配层应提供优雅降级方案或明确的提示，而不是直接报错。
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### 三、 全面的测试标准
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- **单元测试**: 核心算法、状态管理和工具函数等不依赖平台环境的纯逻辑模块，必须编写单元测试，确保其正确性。
+- **集成测试**: 模块之间，特别是游戏逻辑与适配器之间的交互，需要进行集成测试，以验证其协作的稳定性。
+- **发布前手动测试**: 每个版本发布前，必须在微信和抖音两个平台的真实设备（覆盖主流iOS和Android机型）上，根据预定义的测试用例清单完成一轮完整的功能回归测试。
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### 四、 一致的用户体验与性能
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- **视觉与交互一致性**: 游戏的核心UI、动画和交互反馈在两个平台上必须保持高度一致，为用户提供无差别的核心体验。
+- **性能预算**:
+    - **启动时间**: 首次加载时间在标准网络环境下必须小于3秒。
+    - **帧率 (FPS)**: 游戏运行时必须稳定在 60 FPS，在复杂场景下不得低于 45 FPS。
+    - **内存占用**: 在中端机型上，游戏内存占用峰值应控制在 200MB 以内。
+- **资源优化**: 所有美术和音频资源在上线前必须经过压缩优化。图片优先使用 WebP 等高效格式，并根据需要应用图集（Sprite Sheet）技术。
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## 开发工作流
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- **代码审查 (Code Review)**: 所有新代码在合入主分支前，必须经过至少一名其他成员的审查。审查内容包括功能实现、代码风格以及是否遵循本章程。
+- **分支管理**: 遵循 Git Flow 或类似的分支管理策略，功能开发、Bug修复均在独立的分支上进行，保持主分支的稳定和可发布状态。
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## 与AI助手协作
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- **沟通语言**: 与AI助手的所有对话都必须使用中文。
+
+## 治理
+
+- 本章程是项目开发的最高准则，其优先级高于任何个人偏好或临时约定。
+- 对本章程的任何修订都必须经过团队讨论，并以书面形式记录修订原因和具体内容。
+
+**版本**: 1.0.0 | **批准日期**: 2024-11-29 | **上次修订**: 2024-11-29
