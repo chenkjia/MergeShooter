@@ -1,61 +1,84 @@
-let systemInfo = tt.getSystemInfoSync();
-let canvas = tt.createCanvas(),
-  ctx = canvas.getContext('2d');
+import { startScene } from './src/scenes/startScene.js';
+import { gameScene } from './src/scenes/gameScene.js';
+
+export const systemInfo = tt.getSystemInfoSync();
+export const canvas = tt.createCanvas();
+export const ctx = canvas.getContext('2d');
 canvas.width = systemInfo.windowWidth;
 canvas.height = systemInfo.windowHeight;
-// canvas.style.width = systemInfo.windowWidth + 'px';
-// canvas.style.height = systemInfo.windowHeight + 'px';
 
-const startButton = {
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0,
+const resources = {
+  mainBg: 'src/assets/ui/game_area_bg.png',
+  popupBg: 'src/assets/ui/popup_main_bg.png',
+  title: 'src/assets/ui/title.png',
+  startButton: 'src/assets/ui/start_game_btn.png',
 };
 
-function drawImage(src, x, y, width, height, isButton = false) {
-  const image = tt.createImage();
-  image.src = src;
-  image.onload = () => {
-    ctx.drawImage(image, x, y, width, height);
-    if (isButton) {
-      startButton.x = x;
-      startButton.y = y;
-      startButton.width = width;
-      startButton.height = height;
+export const resourceManager = {
+  images: {},
+  load(callback) {
+    const imagePaths = Object.values(resources);
+    const imageKeys = Object.keys(resources);
+    let loadedCount = 0;
+
+    if (imagePaths.length === 0) {
+      callback();
+      return;
     }
-  };
-}
 
-function draw() {
-  // Draw background
-  drawImage('src/assets/ui/game_area_bg.png', 0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    imagePaths.forEach((path, index) => {
+      const key = imageKeys[index];
+      const image = tt.createImage();
+      image.src = path;
+      image.onload = () => {
+        this.images[key] = image;
+        loadedCount++;
+        if (loadedCount === imagePaths.length) {
+          callback();
+        }
+      };
+      image.onerror = (err) => {
+        console.error(`图片加载失败: ${path}`, err);
+      };
+    });
+  }
+};
 
-  // Draw title
-  const titleWidth = systemInfo.windowWidth * 0.8;
-  const titleHeight = titleWidth * (334 / 834);
-  const titleX = (systemInfo.windowWidth - titleWidth) / 2;
-  const titleY = systemInfo.windowHeight * 0.2;
-  drawImage('src/assets/ui/title.png', titleX, titleY, titleWidth, titleHeight);
-
-  // Draw start button
-  const startButtonWidth = systemInfo.windowWidth * 0.6;
-  const startButtonHeight = startButtonWidth * (206 / 626);
-  const startButtonX = (systemInfo.windowWidth - startButtonWidth) / 2;
-  const startButtonY = titleY + titleHeight + 50;
-  drawImage('src/assets/ui/start_game_btn.png', startButtonX, startButtonY, startButtonWidth, startButtonHeight, true);
-}
+const sceneManager = {
+  scenes: {
+    start: startScene,
+    game: gameScene,
+  },
+  activeScene: null,
+  switchScene(sceneName) {
+    if (this.scenes[sceneName]) {
+      this.activeScene = this.scenes[sceneName];
+    } else {
+      console.error(`场景不存在: ${sceneName}`);
+    }
+  },
+  draw() {
+    if (this.activeScene && typeof this.activeScene.draw === 'function') {
+      this.activeScene.draw();
+    }
+  },
+  onTouchStart(touches) {
+    if (this.activeScene && typeof this.activeScene.onTouchStart === 'function') {
+      this.activeScene.onTouchStart(touches, this.switchScene.bind(this));
+    }
+  },
+};
 
 tt.onTouchStart(({ touches }) => {
-  const touch = touches[0];
-  if (
-    touch.clientX >= startButton.x &&
-    touch.clientX <= startButton.x + startButton.width &&
-    touch.clientY >= startButton.y &&
-    touch.clientY <= startButton.y + startButton.height
-  ) {
-    console.log('游戏开始');
-  }
+  sceneManager.onTouchStart(touches);
 });
 
-draw();
+function gameLoop() {
+  sceneManager.draw();
+  requestAnimationFrame(gameLoop);
+}
+
+resourceManager.load(() => {
+  sceneManager.switchScene('start');
+  gameLoop();
+});
