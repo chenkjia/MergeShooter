@@ -1,0 +1,16 @@
+{
+    "setting": {
+        "urlCheck": true,
+        "es6": true,
+        "postcss": true,
+        "minified": true,
+        "newFeature": true,
+        "autoCompile": true,
+        "compileHotReLoad": true,
+        "nativeCompile": true
+    },
+    "appid": "tt5b8a2d37c487028002",
+    "projectname": "MergeShooter",
+    "douyinProjectType": "native",
+    "cloudfunctionRoot": "cloudfunctions/"
+}
