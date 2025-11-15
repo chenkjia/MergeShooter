@@ -1,36 +1,61 @@
-console.log('使用抖音开发者工具开发过程中可以参考以下文档:');
-console.log(
-  'https://developer.open-douyin.com/docs/resource/zh-CN/mini-game/guide/minigame/introduction',
-);
-
 let systemInfo = tt.getSystemInfoSync();
 let canvas = tt.createCanvas(),
   ctx = canvas.getContext('2d');
 canvas.width = systemInfo.windowWidth;
 canvas.height = systemInfo.windowHeight;
+// canvas.style.width = systemInfo.windowWidth + 'px';
+// canvas.style.height = systemInfo.windowHeight + 'px';
 
-function draw() {
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+const startButton = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+};
 
-  ctx.fillStyle = '#000000';
-  ctx.font = `${parseInt(systemInfo.windowWidth / 20)}px Arial`;
-  ctx.fillText('欢迎使用抖音云，请看README', 65, 200);
+function drawImage(src, x, y, width, height, isButton = false) {
   const image = tt.createImage();
-  image.src = 'icon.png';
+  image.src = src;
   image.onload = () => {
-    ctx.drawImage(
-      image,
-      0,
-      0,
-      image.width,
-      image.height,
-      (systemInfo.windowWidth - 100) / 2,
-      60,
-      100,
-      100,
-    );
+    ctx.drawImage(image, x, y, width, height);
+    if (isButton) {
+      startButton.x = x;
+      startButton.y = y;
+      startButton.width = width;
+      startButton.height = height;
+    }
   };
 }
+
+function draw() {
+  // Draw background
+  drawImage('src/assets/ui/game_area_bg.png', 0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+
+  // Draw title
+  const titleWidth = systemInfo.windowWidth * 0.8;
+  const titleHeight = titleWidth * (334 / 834);
+  const titleX = (systemInfo.windowWidth - titleWidth) / 2;
+  const titleY = systemInfo.windowHeight * 0.2;
+  drawImage('src/assets/ui/title.png', titleX, titleY, titleWidth, titleHeight);
+
+  // Draw start button
+  const startButtonWidth = systemInfo.windowWidth * 0.6;
+  const startButtonHeight = startButtonWidth * (206 / 626);
+  const startButtonX = (systemInfo.windowWidth - startButtonWidth) / 2;
+  const startButtonY = titleY + titleHeight + 50;
+  drawImage('src/assets/ui/start_game_btn.png', startButtonX, startButtonY, startButtonWidth, startButtonHeight, true);
+}
+
+tt.onTouchStart(({ touches }) => {
+  const touch = touches[0];
+  if (
+    touch.clientX >= startButton.x &&
+    touch.clientX <= startButton.x + startButton.width &&
+    touch.clientY >= startButton.y &&
+    touch.clientY <= startButton.y + startButton.height
+  ) {
+    console.log('游戏开始');
+  }
+});
 
 draw();
