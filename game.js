@@ -12,6 +12,7 @@ const resources = {
   popupBg: 'src/assets/ui/popup_main_bg.png',
   title: 'src/assets/ui/title.png',
   startButton: 'src/assets/ui/start_game_btn.png',
+  monster1: 'src/assets/monsters/monster01.png',
 };
 
 export const resourceManager = {
@@ -53,8 +54,16 @@ const sceneManager = {
   switchScene(sceneName) {
     if (this.scenes[sceneName]) {
       this.activeScene = this.scenes[sceneName];
+      if (typeof this.activeScene.initialize === 'function') {
+        this.activeScene.initialize();
+      }
     } else {
       console.error(`场景不存在: ${sceneName}`);
+    }
+  },
+  update() {
+    if (this.activeScene && typeof this.activeScene.update === 'function') {
+      this.activeScene.update();
     }
   },
   draw() {
@@ -74,6 +83,7 @@ tt.onTouchStart(({ touches }) => {
 });
 
 function gameLoop() {
+  sceneManager.update();
   sceneManager.draw();
   requestAnimationFrame(gameLoop);
 }
