@@ -1,8 +1,22 @@
 export const systemInfo = tt.getSystemInfoSync();
 export const canvas = tt.createCanvas();
 export const ctx = canvas.getContext('2d');
-canvas.width = systemInfo.windowWidth;
-canvas.height = systemInfo.windowHeight;
+const __pr = systemInfo.pixelRatio || 1;
+canvas.width = Math.round(systemInfo.windowWidth * __pr);
+canvas.height = Math.round(systemInfo.windowHeight * __pr);
+ctx.scale(__pr, __pr);
+
+const pr = systemInfo.pixelRatio || 1;
+const lsW = systemInfo.screenWidth;
+const lsH = systemInfo.screenHeight;
+const lwW = systemInfo.windowWidth;
+const lwH = systemInfo.windowHeight;
+const psW = Math.round(lsW * pr);
+const psH = Math.round(lsH * pr);
+const pwW = Math.round(lwW * pr);
+const pwH = Math.round(lwH * pr);
+console.log(`[系统分辨率] 逻辑屏幕: ${lsW}x${lsH}, 物理屏幕: ${psW}x${psH}, 像素比: ${pr}`);
+console.log(`[系统分辨率] 逻辑窗口: ${lwW}x${lwH}, 物理窗口: ${pwW}x${pwH}`);
 
 const resources = {
   mainBg: 'src/assets/ui/game_area_bg.png',
@@ -10,16 +24,16 @@ const resources = {
   title: 'src/assets/ui/title.png',
   startButton: 'src/assets/ui/start_game_btn.png',
   monster1: 'src/assets/monsters/monster01.png',
-  tank_level_1: 'doc/Guns/Gun01/Idle/Gun01-Idle_0.png',
-  tank_level_2: 'doc/Guns/Gun02/Idle/Gun02-Idle_0.png',
-  tank_level_3: 'doc/Guns/Gun03/Idle/Gun03-Idle_0.png',
-  tank_level_4: 'doc/Guns/Gun04/Idle/Gun04-Idle_0.png',
-  tank_level_5: 'doc/Guns/Gun05/Idle/Gun05-Idle_0.png',
-  tank_level_6: 'doc/Guns/Gun06/Idle/Gun06-Idle_0.png',
-  tank_level_7: 'doc/Guns/Gun07/Idle/Gun07-Idle_0.png',
-  tank_level_8: 'doc/Guns/Gun08/Idle/Gun08-Idle_0.png',
-  tank_level_9: 'doc/Guns/Gun09/Idle/Gun09-Idle_0.png',
-  tank_level_10: 'doc/Guns/Gun10/Idle/Gun10-Idle_0.png',
+  tank_level_1: 'src/assets/tanks/guns/Gun01-Idle_0.png',
+  tank_level_2: 'src/assets/tanks/guns/Gun02-Idle_0.png',
+  tank_level_3: 'src/assets/tanks/guns/Gun03-Idle_0.png',
+  tank_level_4: 'src/assets/tanks/guns/Gun04-Idle_0.png',
+  tank_level_5: 'src/assets/tanks/guns/Gun05-Idle_0.png',
+  tank_level_6: 'src/assets/tanks/guns/Gun06-Idle_0.png',
+  tank_level_7: 'src/assets/tanks/guns/Gun07-Idle_0.png',
+  tank_level_8: 'src/assets/tanks/guns/Gun08-Idle_0.png',
+  tank_level_9: 'src/assets/tanks/guns/Gun09-Idle_0.png',
+  tank_level_10: 'src/assets/tanks/guns/Gun10-Idle_0.png',
   // 底部按钮图片 - 已复制到assets目录
   bottom_button_01: 'src/assets/ui/buttons/btn01.png',
   bottom_button_01_pressed: 'src/assets/ui/buttons/btn01 pressed.png',
