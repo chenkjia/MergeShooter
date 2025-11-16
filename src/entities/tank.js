@@ -1,4 +1,4 @@
-import { ctx } from '../core/context.js';
+import { } from '../core/context.js';
 
 export class Tank {
   constructor(level, x, y, image) {
@@ -7,7 +7,13 @@ export class Tank {
     this.y = y;
     this.width = 50; // 坦克宽度，可根据素材调整
     this.height = 50; // 坦克高度，可根据素材调整
-    this.image = image;
+    if (typeof PIXI !== 'undefined') {
+      this.texture = image ? (image.baseTexture ? new PIXI.Texture(image.baseTexture) : image) : null;
+      this.sprite = this.texture ? new PIXI.Sprite(this.texture) : new PIXI.Graphics();
+    } else {
+      this.texture = null;
+      this.sprite = null;
+    }
     this.attack = 10 * level;
     this.attackSpeed = 1; // seconds per attack
     this.health = 100 * level;
@@ -16,15 +22,18 @@ export class Tank {
   }
 
   draw() {
-    if (this.image) {
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    if (typeof PIXI === 'undefined' || !this.sprite) return;
+    if (this.sprite instanceof PIXI.Graphics) {
+      this.sprite.clear();
+      this.sprite.beginFill(0x0000ff);
+      this.sprite.drawRect(0, 0, this.width, this.height);
+      this.sprite.endFill();
     } else {
-      // Fallback drawing if image is not loaded
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(this.x, this.y, this.width, this.height);
-      ctx.fillStyle = 'white';
-      ctx.fillText(this.level, this.x + 20, this.y + 30);
+      this.sprite.width = this.width;
+      this.sprite.height = this.height;
     }
+    this.sprite.x = this.x;
+    this.sprite.y = this.y;
   }
 
   update(monsters) {

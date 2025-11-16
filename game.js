@@ -1,6 +1,6 @@
 import { startScene } from './src/scenes/startScene.js';
 import { gameScene } from './src/scenes/gameScene.js';
-import { systemInfo, canvas, ctx, resourceManager } from './src/core/context.js';
+import { systemInfo, canvas, pixiApp, resourceManager } from './src/core/context.js';
 
 const sceneManager = {
   scenes: {
@@ -60,6 +60,9 @@ tt.onTouchEnd(({ touches }) => {
 function gameLoop() {
   sceneManager.update();
   sceneManager.draw();
+  if (pixiApp && pixiApp.renderer && pixiApp.stage) {
+    pixiApp.renderer.render(pixiApp.stage);
+  }
   requestAnimationFrame(gameLoop);
 }
 

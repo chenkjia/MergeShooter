@@ -15,7 +15,7 @@ export const WaveManager = () => {
   };
   const spawn = (gameState, resourceManager, createMonster) => {
     const type = getType(currentWave);
-    const img = resourceManager.images.monster1;
+    const img = resourceManager.textures.monster1;
     if (type === 'boss') {
       const m = createMonster(
         gameState.battleArea.x + gameState.battleArea.width / 2 - 25,

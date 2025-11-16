@@ -1,4 +1,4 @@
-import { ctx } from '../core/context.js';
+import { } from '../core/context.js';
 
 export class Monster {
   constructor(x, y, image, opts = {}) {
@@ -6,7 +6,13 @@ export class Monster {
     this.y = y;
     this.width = 50;
     this.height = 50;
-    this.image = image;
+    if (typeof PIXI !== 'undefined') {
+      this.texture = image ? (image.baseTexture ? new PIXI.Texture(image.baseTexture) : image) : null;
+      this.sprite = this.texture ? new PIXI.Sprite(this.texture) : new PIXI.Graphics();
+    } else {
+      this.texture = null;
+      this.sprite = null;
+    }
     this.speed = 1;
     this.direction = 1; // 1 for right, -1 for left
     this.type = opts.type || 'normal';
@@ -22,12 +28,18 @@ export class Monster {
   }
 
   draw() {
-    if (this.image) {
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    if (typeof PIXI === 'undefined' || !this.sprite) return;
+    if (this.sprite instanceof PIXI.Graphics) {
+      this.sprite.clear();
+      this.sprite.beginFill(0xff0000);
+      this.sprite.drawRect(0, 0, this.width, this.height);
+      this.sprite.endFill();
     } else {
-      ctx.fillStyle = 'red';
-      ctx.fillRect(this.x, this.y, this.width, this.height);
+      this.sprite.width = this.width;
+      this.sprite.height = this.height;
     }
+    this.sprite.x = this.x;
+    this.sprite.y = this.y;
   }
 
   update(gameArea) {

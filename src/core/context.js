@@ -1,10 +1,19 @@
 export const systemInfo = tt.getSystemInfoSync();
 export const canvas = tt.createCanvas();
-export const ctx = canvas.getContext('2d');
 const __pr = systemInfo.pixelRatio || 1;
 canvas.width = Math.round(systemInfo.windowWidth * __pr);
 canvas.height = Math.round(systemInfo.windowHeight * __pr);
-ctx.scale(__pr, __pr);
+export const ctx = canvas.getContext('2d');
+if (ctx && __pr && __pr !== 1) { ctx.scale(__pr, __pr); }
+export const pixiApp = (typeof PIXI !== 'undefined') ? new PIXI.Application({
+  view: canvas,
+  width: systemInfo.windowWidth,
+  height: systemInfo.windowHeight,
+  resolution: __pr,
+  autoDensity: true,
+  backgroundAlpha: 1,
+  antialias: true,
+}) : null;
 
 const pr = systemInfo.pixelRatio || 1;
 const lsW = systemInfo.screenWidth;
@@ -54,7 +63,7 @@ const resources = {
 };
 
 export const resourceManager = {
-  images: {},
+  textures: {},
   load(callback) {
     const imagePaths = Object.values(resources);
     const imageKeys = Object.keys(resources);
@@ -68,7 +77,11 @@ export const resourceManager = {
       const image = tt.createImage();
       image.src = path;
       image.onload = () => {
-        this.images[key] = image;
+        if (typeof PIXI !== 'undefined') {
+          this.textures[key] = PIXI.Texture.from(image);
+        } else {
+          this.textures[key] = image;
+        }
         loadedCount++;
         if (loadedCount === imagePaths.length) {
           callback();
