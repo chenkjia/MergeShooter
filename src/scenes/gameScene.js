@@ -1,6 +1,6 @@
 import { systemInfo, ctx, resourceManager } from '../core/context.js';
 
-const gameState = { bottomButtons: [], money: 1 };
+const gameState = { bottomButtons: [], money: 10000 };
 
 export const gameScene = {
   isInitialized: false,
