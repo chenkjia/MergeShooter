@@ -25,6 +25,7 @@ export const gameScene = {
     const startY = screenHeight - buttonHeight - bottomMargin;
     let x = spacing;
     gameState.bottomButtons = [];
+    const iconKeys = ['store_icon', null, null, 'trash_icon'];
     for (let i = 0; i < numButtons; i++) {
       const w = widths[i];
       gameState.bottomButtons.push({
@@ -36,7 +37,8 @@ export const gameScene = {
         imagePressed: resourceManager.images['bottom_button_0' + (i + 1) + '_pressed'],
         type: ['shop', 'spawn_tank', 'upgrade', 'energy'][i],
         isPressed: false,
-        slice: 16
+        slice: 16,
+        iconKey: iconKeys[i]
       });
       x += w + spacing;
     }
@@ -85,6 +87,19 @@ export const gameScene = {
           this.drawNineSlice(img, b.x, b.y, b.width, b.height, b.slice || 16);
         } else {
           ctx.drawImage(img, b.x, b.y, b.width, b.height);
+        }
+        const iconImg = b.iconKey ? resourceManager.images[b.iconKey] : null;
+        if (iconImg && iconImg.complete) {
+          const maxIconW = Math.floor(b.width * 0.6);
+          const maxIconH = Math.floor(b.height * 0.6);
+          const iw = iconImg.width || maxIconW;
+          const ih = iconImg.height || maxIconH;
+          const scale = Math.min(maxIconW / iw, maxIconH / ih);
+          const dw = Math.max(1, Math.floor(iw * scale));
+          const dh = Math.max(1, Math.floor(ih * scale));
+          const dx = Math.floor(b.x + (b.width - dw) / 2);
+          const dy = Math.floor(b.y + (b.height - dh) / 2);
+          ctx.drawImage(iconImg, dx, dy, dw, dh);
         }
       } else {
         ctx.fillStyle = '#CCCCCC';
