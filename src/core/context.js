@@ -47,6 +47,7 @@ const resources = {
   trash_icon: 'src/assets/ui/buttons/bin_icon.png',
   // 商店图标
   store_icon: 'src/assets/ui/buttons/store_icon.png',
+  money_bar: 'src/assets/ui/money_bar.png',
 };
 
 export const resourceManager = {

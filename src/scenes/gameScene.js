@@ -1,6 +1,6 @@
 import { systemInfo, ctx, resourceManager } from '../core/context.js';
 
-const gameState = { bottomButtons: [] };
+const gameState = { bottomButtons: [], money: 1 };
 
 export const gameScene = {
   isInitialized: false,
@@ -47,6 +47,67 @@ export const gameScene = {
     const areaH = buttonHeight + bottomMargin + topPad;
     this.buttonArea = { x: 0, y: areaY, width: screenWidth, height: areaH };
   },
+
+  drawMoney() {
+    const moneyBarImg = resourceManager.images.money_bar;
+    if (moneyBarImg && moneyBarImg.complete) {
+      const scale = 0.3;
+      const barX = 0;
+      const barY = 10;
+      const barHeight = moneyBarImg.height * scale;
+      const text = gameState.money.toString();
+      
+      const fontSize = Math.floor(barHeight * 0.6); // A bit smaller for padding
+      ctx.font = `bold ${fontSize}px Helvetica`;
+      
+      const textMetrics = ctx.measureText(text);
+      const textWidth = textMetrics.width;
+      
+      // Assuming the source image has square caps on both ends
+      const sourceCapWidth = moneyBarImg.height; 
+      const destCapWidth = barHeight; 
+      
+      const horizontalPadding = 10; // Padding between text and caps
+      const totalWidth = destCapWidth  + textWidth + horizontalPadding * 2;
+
+      this.drawThreeSlice(moneyBarImg, barX, barY, totalWidth, barHeight, sourceCapWidth);
+
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+
+      // Align text to the right, before the right cap begins
+      const textX = barX + totalWidth - horizontalPadding;
+      const textY = barY + barHeight / 2;
+
+      ctx.strokeText(text, textX, textY);
+      ctx.fillText(text, textX, textY);
+    }
+  },
+
+  drawThreeSlice(img, dx, dy, dw, dh, sliceWidth) {
+    const img_sw = img.width;
+    const img_sh = img.height;
+    
+    // Destination cap width, maintaining aspect ratio.
+    const cap_dw = sliceWidth * (dh / img_sh);
+    
+    // Draw left cap
+    ctx.drawImage(img, 0, 0, sliceWidth, img_sh, dx, dy, cap_dw, dh);
+    
+    // Draw middle (stretched)
+    const middle_sw = img_sw - sliceWidth * 2;
+    const middle_dw = dw - cap_dw * 2;
+    if (middle_dw > 0) {
+      ctx.drawImage(img, sliceWidth, 0, middle_sw, img_sh, dx + cap_dw, dy, middle_dw, dh);
+    }
+    
+    // Draw right cap
+    ctx.drawImage(img, img_sw - sliceWidth, 0, sliceWidth, img_sh, dx + dw - cap_dw, dy, cap_dw, dh);
+  },
+
 
   drawNineSlice(img, dx, dy, dw, dh, s) {
     const sw = img.width || dw;
@@ -124,6 +185,7 @@ export const gameScene = {
       ctx.fillRect(this.buttonArea.x, this.buttonArea.y, this.buttonArea.width, this.buttonArea.height);
     }
     this.drawBottomButtons();
+    this.drawMoney();
   },
 
   handleBottomButtonClick(button) {
