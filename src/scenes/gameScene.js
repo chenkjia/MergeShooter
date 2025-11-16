@@ -25,20 +25,22 @@ export const gameScene = {
     const startY = screenHeight - buttonHeight - bottomMargin;
     let x = spacing;
     gameState.bottomButtons = [];
-    const iconKeys = ['store_icon', null, null, 'trash_icon'];
+    const iconKeys = ['store_icon', 'tank_icon', 'shield_icon', 'trash_icon'];
     for (let i = 0; i < numButtons; i++) {
       const w = widths[i];
+      const style = i === 1 ? 'bottom_button_02' : (i === 2 ? 'bottom_button_03' : (i === 0 ? 'bottom_button_01' : 'bottom_button_04'));
       gameState.bottomButtons.push({
         x: x,
         y: startY,
         width: w,
         height: buttonHeight,
-        image: resourceManager.images['bottom_button_0' + (i + 1)],
-        imagePressed: resourceManager.images['bottom_button_0' + (i + 1) + '_pressed'],
+        image: resourceManager.images[style],
+        imagePressed: resourceManager.images[style + '_pressed'],
         type: ['shop', 'spawn_tank', 'upgrade', 'energy'][i],
         isPressed: false,
         slice: 16,
-        iconKey: iconKeys[i]
+        iconKey: iconKeys[i],
+        cost: i === 1 ? 1 : (i === 2 ? 2 : null)
       });
       x += w + spacing;
     }
@@ -139,6 +141,8 @@ export const gameScene = {
   drawBottomButtons() {
     for (let i = 0; i < gameState.bottomButtons.length; i++) {
       const b = gameState.bottomButtons[i];
+      const isDisabled = b.cost !== null && gameState.money < b.cost;
+      ctx.globalAlpha = isDisabled ? 0.5 : 1.0;
       const img = b.isPressed && b.imagePressed ? b.imagePressed : b.image;
       if (img && img.complete) {
         const needsScale = (img.width && (img.width !== b.width || img.height !== b.height));
@@ -158,9 +162,25 @@ export const gameScene = {
           const scale = Math.min(maxIconW / iw, maxIconH / ih);
           const dw = Math.max(1, Math.floor(iw * scale));
           const dh = Math.max(1, Math.floor(ih * scale));
-          const dx = Math.floor(b.x + (b.width - dw) / 2);
+          const iconPadding = 10; // Padding on the left of the icon
+          const dx = Math.floor(b.x + iconPadding);
           const dy = Math.floor(b.y + (b.height - dh) / 2);
           ctx.drawImage(iconImg, dx, dy, dw, dh);
+
+          if (b.cost !== null) {
+            const text = b.cost.toString();
+            const fontSize = Math.floor(b.height * 0.4);
+            ctx.font = `bold ${fontSize}px Helvetica`;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            const textX = dx + dw + 10; // 10px padding to the right of the icon
+            const textY = b.y + b.height / 2;
+            ctx.strokeText(text, textX, textY);
+            ctx.fillText(text, textX, textY);
+          }
         }
       } else {
         ctx.fillStyle = '#CCCCCC';
@@ -172,6 +192,7 @@ export const gameScene = {
         ctx.textBaseline = 'middle';
         ctx.fillText(b.type, b.x + b.width / 2, b.y + b.height / 2);
       }
+      ctx.globalAlpha = 1.0; // Reset alpha after drawing each button
     }
   },
 
@@ -198,7 +219,9 @@ export const gameScene = {
     const touch = { x: t.clientX, y: t.clientY };
     for (let i = 0; i < gameState.bottomButtons.length; i++) {
       const b = gameState.bottomButtons[i];
+      const isDisabled = b.cost !== null && gameState.money < b.cost;
       if (touch.x >= b.x && touch.x <= b.x + b.width && touch.y >= b.y && touch.y <= b.y + b.height) {
+        if (isDisabled) return; // Do nothing if the button is disabled
         b.isPressed = true;
         this.handleBottomButtonClick(b);
         setTimeout(function() { b.isPressed = false; }, 200);

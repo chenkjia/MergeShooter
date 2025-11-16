@@ -48,6 +48,9 @@ const resources = {
   // 商店图标
   store_icon: 'src/assets/ui/buttons/store_icon.png',
   money_bar: 'src/assets/ui/money_bar.png',
+  shield_icon: 'src/assets/ui/buttons/shield_icon.png',
+  tank_icon: 'src/assets/ui/buttons/tank_icon.png',
+
 };
 
 export const resourceManager = {
