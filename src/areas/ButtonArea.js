@@ -1,4 +1,5 @@
-import { pixiApp, ctx, systemInfo, resourceManager } from '../core/context.js';
+import { pixiApp, ctx, resourceManager } from '../core/context.js';
+import { emit, on } from '../core/events.js';
 
 export class ButtonArea {
   constructor(bounds) {
@@ -6,7 +7,9 @@ export class ButtonArea {
     this.container = null;
     this.bg = null;
     this.buttons = [];
+    this.isTurretSlotsFull = false;
   }
+
   initialize() {
     if (pixiApp && typeof PIXI !== 'undefined') {
       this.container = new PIXI.Container();
@@ -15,7 +18,12 @@ export class ButtonArea {
       pixiApp.stage.addChild(this.container);
     }
     this.createButtons();
+    on('turret_slots_full', (isFull) => {
+      this.isTurretSlotsFull = isFull;
+      this.updateButtonStates();
+    });
   }
+
   draw() {
     if (pixiApp && typeof PIXI !== 'undefined') {
       this.bg.clear();
@@ -29,8 +37,11 @@ export class ButtonArea {
       this.drawButtonsCanvas();
     }
   }
+
   update() {}
+
   onTouchMove() {}
+
   onTouchStart(touches) {
     const t = touches && touches[0];
     if (!t) return;
@@ -40,16 +51,33 @@ export class ButtonArea {
       const b = this.buttons[i];
       const hit = x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height;
       if (hit) {
+        if (b.disabled) return;
+        emit('button_click', b);
         b.isPressed = true;
         if (pixiApp && typeof PIXI !== 'undefined' && b.display) {
           b.display.texture = b.pressedTexture || b.normalTexture;
         }
-        setTimeout(() => { b.isPressed = false; if (pixiApp && typeof PIXI !== 'undefined' && b.display) { b.display.texture = b.normalTexture; } }, 150);
+        setTimeout(() => {
+          b.isPressed = false;
+          if (pixiApp && typeof PIXI !== 'undefined' && b.display) {
+            b.display.texture = b.normalTexture;
+          }
+        }, 150);
         break;
       }
     }
   }
+
   onTouchEnd() {}
+
+  updateButtonStates() {
+    for (let i = 0; i < this.buttons.length; i++) {
+      const b = this.buttons[i];
+      if (b.type === 'spawn_tank') {
+        b.disabled = this.isTurretSlotsFull;
+      }
+    }
+  }
 
   createButtons() {
     const spacing = 5;
@@ -74,10 +102,12 @@ export class ButtonArea {
         width: w,
         height: buttonHeight,
         type: ['shop', 'spawn_tank', 'upgrade', 'energy'][i],
+        cost: [0, 1, 2, 0][i],
         isPressed: false,
         slice: 16,
         iconKey: iconKeys[i],
         pressedTexture: tex[styleKey + '_pressed'] || null,
+        disabledTexture: tex[styleKey + '_disabled'] || null,
         normalTexture: tex[styleKey] || null,
         display: null,
         icon: null,
@@ -103,6 +133,19 @@ export class ButtonArea {
         this.container.addChild(iconSprite);
         btn.display = plane;
         btn.icon = iconSprite;
+        const costText = new PIXI.Text(btn.cost > 0 ? btn.cost : '', {
+          fontFamily: 'Helvetica',
+          fontSize: 18,
+          fontWeight: 'bold',
+          fill: 0xFFFFFF,
+          stroke: 0x000000,
+          strokeThickness: 3
+        });
+        costText.anchor.set(0.5, 1);
+        costText.x = btn.x + btn.width / 2;
+        costText.y = btn.y + btn.height / 2;
+        this.container.addChild(costText);
+        btn.costText = costText;
       }
       x += w + spacing;
     }
@@ -112,7 +155,7 @@ export class ButtonArea {
     const tex = resourceManager.textures;
     for (let i = 0; i < this.buttons.length; i++) {
       const b = this.buttons[i];
-      const img = b.isPressed && b.pressedTexture ? b.pressedTexture : b.normalTexture;
+      const img = b.isPressed && b.pressedTexture ? b.pressedTexture : (b.disabled && b.disabledTexture ? b.disabledTexture : b.normalTexture);
       if (img) this.drawNineSlice(img, b.x, b.y, b.width, b.height, b.slice);
       const iconImg = tex[b.iconKey];
       if (iconImg) {
@@ -126,6 +169,19 @@ export class ButtonArea {
         const dx = Math.floor(b.x + 10);
         const dy = Math.floor(b.y + (b.height - dh) / 2);
         ctx.drawImage(iconImg, dx, dy, dw, dh);
+        if (b.cost > 0) {
+          ctx.font = 'bold 18px Helvetica';
+          ctx.fillStyle = '#FFFFFF';
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 3;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          const text = b.cost.toString();
+          const textX = b.x + b.width / 2;
+          const textY = b.y + b.height / 2 + 9;
+          ctx.strokeText(text, textX, textY);
+          ctx.fillText(text, textX, textY);
+        }
       }
     }
   }
@@ -134,7 +190,7 @@ export class ButtonArea {
     for (let i = 0; i < this.buttons.length; i++) {
       const b = this.buttons[i];
       if (!b.display) continue;
-      b.display.texture = b.isPressed && b.pressedTexture ? b.pressedTexture : b.normalTexture;
+      b.display.texture = b.isPressed && b.pressedTexture ? b.pressedTexture : (b.disabled && b.disabledTexture ? b.disabledTexture : b.normalTexture);
       b.display.x = b.x;
       b.display.y = b.y;
       b.display.width = b.width;
@@ -153,6 +209,11 @@ export class ButtonArea {
         b.icon.height = dh;
         b.icon.x = dx;
         b.icon.y = dy;
+        if (b.costText) {
+          b.costText.text = b.cost > 0 ? b.cost : '';
+          b.costText.x = b.x + b.width / 2;
+          b.costText.y = b.y + b.height / 2;
+        }
       }
     }
   }
@@ -160,7 +221,10 @@ export class ButtonArea {
   drawNineSlice(img, dx, dy, dw, dh, s) {
     const sw = img.width || dw;
     const sh = img.height || dh;
-    let l = s, r = s, t = s, b = s;
+    let l = s,
+      r = s,
+      t = s,
+      b = s;
     const maxL = Math.floor(sw / 2) - 1;
     const maxT = Math.floor(sh / 2) - 1;
     const maxDw = Math.floor(dw / 2) - 1;

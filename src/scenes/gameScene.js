@@ -2,6 +2,7 @@ import { systemInfo, pixiApp, resourceManager, ctx } from '../core/context.js';
 import { computeAreaRects } from '../core/layout.js';
 import { TurretArea } from '../areas/TurretArea.js';
 import { ButtonArea } from '../areas/ButtonArea.js';
+import { on, emit } from '../core/events.js';
 
 const gameState = { bottomButtons: [], money: 10000 };
 
@@ -33,6 +34,7 @@ export const gameScene = {
     this.turretArea.initialize();
     this.buttonArea = new ButtonArea(rects.buttons);
     this.buttonArea.initialize();
+    on('button_click', this.handleBottomButtonClick.bind(this));
     this.isInitialized = true;
   },
 
@@ -140,7 +142,12 @@ export const gameScene = {
     }
   },
 
-  handleBottomButtonClick(button) {},
+  handleBottomButtonClick(button) {
+    if (gameState.money >= button.cost) {
+      gameState.money -= button.cost;
+      emit(button.type, button);
+    }
+  },
 
   onTouchStart(touches) {
     if (this.buttonArea && typeof this.buttonArea.onTouchStart === 'function') {
@@ -148,7 +155,9 @@ export const gameScene = {
     }
   },
 
-  update() {},
+  update() {
+    if (this.turretArea) this.turretArea.update();
+  },
   onTouchMove(touches) {
     if (this.turretArea && typeof this.turretArea.onTouchMove === 'function') {
       this.turretArea.onTouchMove(touches);
