@@ -7,18 +7,23 @@ const styles = {
     occupiedBorder: 0xffd700,
   },
   turret: {
-    outerSize: 56,
-    innerSize: 48,
+    outerSize: 54,
+    innerSize: 46,
     innerRadius: 2,
     spacing: 6,
     rows: 2,
     cols: 6,
   },
+  shooting: {
+    spotWidth: 54,
+    spotHeight: 54,
+    spotRadius: 6,
+  },
   layout: {
-    monster: 0.3,
-    shooting: 0.3,
-    turret: 0.25,
-    buttons: 0.15,
+    monster: 0.6,
+    shooting: 0.1,
+    turret: 0.2,
+    buttons: 0.10,
   },
 };
 

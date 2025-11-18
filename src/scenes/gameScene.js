@@ -3,6 +3,7 @@ const { threeSliceRects } = require('../core/slices.js');
 const { computeAreaRects } = require('../core/layout.js');
 const TurretArea = require('../areas/TurretArea.js');
 const ButtonArea = require('../areas/ButtonArea.js');
+const ShootingArea = require('../areas/ShootingArea.js');
 const { on, emit } = require('../core/events.js');
 
 const gameState = { bottomButtons: [], money: 10000 };
@@ -11,11 +12,14 @@ const gameScene = {
   isInitialized: false,
   turretArea: null,
   buttonArea: null,
+  shootingArea: null,
   initialize() {
     if (this.isInitialized) return;
     const screenWidth = systemInfo.windowWidth;
     const screenHeight = systemInfo.windowHeight;
     const rects = computeAreaRects(screenWidth, screenHeight);
+    this.shootingArea = new ShootingArea(rects.shooting);
+    this.shootingArea.initialize();
     this.turretArea = new TurretArea(rects.turret);
     this.turretArea.initialize();
     this.buttonArea = new ButtonArea(rects.buttons);
@@ -93,8 +97,10 @@ const gameScene = {
   draw() {
     if (!this.isInitialized) this.initialize();
     ctx.clearRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
-    ctx.fillStyle = '#44a5c8';
+    if (ctx && typeof ctx.setLineDash === 'function') ctx.setLineDash([]);
+    ctx.fillStyle = '#5a98c4';
     ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    if (this.shootingArea) this.shootingArea.draw();
     if (this.turretArea) this.turretArea.draw();
     if (this.buttonArea) this.buttonArea.draw();
     this.drawMoney();
