@@ -33,10 +33,12 @@ class TurretSlot {
   }
 
   occupy(level) {
+    // 在当前槽位放置指定等级的炮塔（仅记录数据，实际绘制在 drawCanvas 中）
     this.tank = { level };
   }
 
   drawCanvas() {
+    // 绘制外框与圆角内框
     const st = turretSlotStyles[this.state] || turretSlotStyles.default;
     const halfOuter = this.outerSize / 2;
     const halfInner = this.innerSize / 2;
@@ -54,6 +56,7 @@ class TurretSlot {
     ctx.arcTo(ix, iy, ix + this.innerSize, iy, r);
     ctx.closePath();
     ctx.fill();
+    // 绘制炮塔贴图（若槽位已占用）
     if (this.tank) {
       const def = levels[this.tank.level] || null;
       const tankImg = def ? resourceManager.textures[def.textureKey] : null;
@@ -64,6 +67,7 @@ class TurretSlot {
         ctx.drawImage(tankImg, x, y, tankSize, tankSize);
       }
     }
+    // 状态边框（默认/悬停/占用）
     if (st.borderWidth > 0) {
       ctx.lineWidth = st.borderWidth;
       ctx.strokeStyle = `#${st.borderColor.toString(16)}`;

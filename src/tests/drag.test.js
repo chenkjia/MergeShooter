@@ -1,5 +1,7 @@
 const TurretArea = require('../areas/TurretArea.js');
 
+// 用例：验证生成的一级炮塔可以被拾取并进入拖拽状态
+
 function assert(cond, msg) { if (!cond) throw new Error(msg || 'Assertion failed'); }
 
 function testPickSpawnedLevel1() {

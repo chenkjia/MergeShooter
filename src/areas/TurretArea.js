@@ -7,11 +7,15 @@ const { computeDropResult } = require('../core/mergeLogic.js');
 
 class TurretArea {
   constructor(bounds) {
+    // 区域边界（用于绘制与触摸命中）
     this.bounds = bounds;
     this.container = null;
     this.bg = null;
+    // 炮塔槽位集合
     this.slots = [];
+    // 战斗用炮塔实例集合（预留）
     this.tanks = [];
+    // 拖拽相关状态
     this.draggingTank = null;
     this.dragSprite = null;
     this.dragStartSlot = null;
@@ -19,11 +23,13 @@ class TurretArea {
   }
 
   initialize() {
+    // 创建槽位网格并订阅生产事件
     this.createGrid();
     on('spawn_tank', this.spawnTank.bind(this));
   }
 
   createGrid() {
+    // 根据样式配置计算居中网格布局
     const rows = styles.turret.rows;
     const cols = styles.turret.cols;
     const spacing = styles.turret.spacing;
@@ -45,12 +51,15 @@ class TurretArea {
   }
 
   draw() {
+    // 绘制炮塔区域背景与边框
     ctx.fillStyle = `#${styles.colors.turretBg.toString(16)}`;
     ctx.fillRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
     ctx.strokeStyle = '#00000033';
     ctx.lineWidth = 1;
     ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
+    // 绘制所有槽位
     for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
+    // 绘制拖拽中的炮塔贴图（随指针移动）
     if (this.draggingTank) {
       const def = levels[this.draggingTank.level] || null;
       const tankImg = def ? resourceManager.textures[def.textureKey] : null;
@@ -63,6 +72,7 @@ class TurretArea {
   }
 
   update() {
+    // 广播槽位是否已满：用于禁用生产按钮
     const isFull = this.slots.every(s => s.isOccupied());
     if (isFull !== this.wasFull) {
       emit('turret_slots_full', isFull);
@@ -75,6 +85,7 @@ class TurretArea {
     if (!t) return;
     const x = t.clientX;
     const y = t.clientY;
+    // 槽位悬停高亮与记录
     this.dragOverSlot = null;
     for (let i = 0; i < this.slots.length; i++) {
       const s = this.slots[i];
@@ -85,6 +96,7 @@ class TurretArea {
         s.setState('default');
       }
     }
+    // 更新拖拽图标位置
     if (this.draggingTank) {
       this.draggingTank.x = x;
       this.draggingTank.y = y;
@@ -96,6 +108,7 @@ class TurretArea {
     if (!t) return;
     const x = t.clientX;
     const y = t.clientY;
+    // 命中已占用槽位则开始拖拽（取出炮塔）
     for (let i = 0; i < this.slots.length; i++) {
       const s = this.slots[i];
       if (s.contains(x, y) && s.isOccupied()) {
@@ -107,6 +120,7 @@ class TurretArea {
     }
   }
   onTouchEnd() {
+    // 计算拖拽释放结果并执行占位/合并/回退
     const res = computeDropResult(this.draggingTank, this.dragStartSlot, this.dragOverSlot);
     if (res.type === 'merge') {
       this.dragOverSlot.occupy(res.level);
@@ -115,6 +129,7 @@ class TurretArea {
     } else if (res.type === 'move_back') {
       this.dragStartSlot.occupy(this.draggingTank.level);
     }
+    // 清理拖拽状态
     this.draggingTank = null;
     this.dragStartSlot = null;
     this.dragOverSlot = null;

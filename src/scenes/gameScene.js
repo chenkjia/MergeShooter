@@ -33,6 +33,7 @@ const gameScene = {
     const text = gameState.money.toString();
     const img = resourceManager.textures.money_bar;
     if (!img) return;
+    // 三切图绘制金币条：左端圆角，中段拉伸，右端圆角
     const barHeight = img.height * scale;
     const horizontalPadding = 10;
     ctx.font = `bold ${Math.floor(barHeight * 0.6)}px Helvetica`;
@@ -107,6 +108,7 @@ const gameScene = {
   },
 
   onTouchStart(touches) {
+    // 先路由到炮塔区域以支持拾取拖拽，再路由到按钮区域处理点击
     if (this.turretArea && typeof this.turretArea.onTouchStart === 'function') {
       this.turretArea.onTouchStart(touches);
     }
@@ -124,6 +126,7 @@ const gameScene = {
     }
   },
   onTouchEnd(touches) {
+    // 分发触摸结束事件，完成拖拽释放与按钮态复位
     if (this.turretArea && typeof this.turretArea.onTouchEnd === 'function') {
       this.turretArea.onTouchEnd(touches);
     }
