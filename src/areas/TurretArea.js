@@ -21,6 +21,8 @@ class TurretArea {
     this.dragSprite = null;
     this.dragStartSlot = null;
     this.dragOverSlot = null;
+    this.dragOverSpotIndex = null;
+    this.shootingArea = null;
   }
 
   initialize() {
@@ -60,11 +62,11 @@ class TurretArea {
     ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
     // 绘制所有槽位
     for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
-    // 绘制拖拽中的炮塔贴图（随指针移动）
-    if (this.draggingTank) {
-      drawTankWithBadge(this.draggingTank.x, this.draggingTank.y, this.draggingTank.level, styles.turret.innerSize);
-    }
     for (let i = 0; i < this.tanks.length; i++) this.tanks[i].draw();
+  }
+
+  setShootingArea(area) {
+    this.shootingArea = area;
   }
 
   update() {
@@ -90,6 +92,15 @@ class TurretArea {
         this.dragOverSlot = s;
       } else {
         s.setState('default');
+      }
+    }
+    this.dragOverSpotIndex = null;
+    if (this.shootingArea && Array.isArray(this.shootingArea.spots)) {
+      for (let i = 0; i < this.shootingArea.spots.length; i++) {
+        if (this.shootingArea.containsPointInSpot(i, x, y)) {
+          this.dragOverSpotIndex = i;
+          break;
+        }
       }
     }
     // 更新拖拽图标位置
@@ -119,20 +130,37 @@ class TurretArea {
     }
   }
   onTouchEnd() {
-    // 计算拖拽释放结果并执行占位/合并/回退
-    const res = computeDropResult(this.draggingTank, this.dragStartSlot, this.dragOverSlot);
-    if (res.type === 'merge') {
-      this.dragOverSlot.occupy(res.level);
-    } else if (res.type === 'move_to') {
-      this.dragOverSlot.occupy(res.level);
-    } else if (res.type === 'move_back') {
-      this.dragStartSlot.occupy(this.draggingTank.level);
+    if (this.dragOverSpotIndex !== null && this.shootingArea) {
+      const idx = this.dragOverSpotIndex;
+      if (!this.shootingArea.isSpotOccupied(idx)) {
+        this.shootingArea.occupySpot(idx, this.draggingTank.level);
+      } else {
+        const spotLevel = this.shootingArea.getSpotLevel(idx);
+        if (spotLevel === this.draggingTank.level) {
+          const next = Math.min(maxLevel, spotLevel + 1);
+          if (next > spotLevel) {
+            this.shootingArea.occupySpot(idx, next);
+          } else {
+            this.dragStartSlot.occupy(this.draggingTank.level);
+          }
+        } else {
+          this.dragStartSlot.occupy(this.draggingTank.level);
+        }
+      }
+    } else {
+      const res = computeDropResult(this.draggingTank, this.dragStartSlot, this.dragOverSlot);
+      if (res.type === 'merge') {
+        this.dragOverSlot.occupy(res.level);
+      } else if (res.type === 'move_to') {
+        this.dragOverSlot.occupy(res.level);
+      } else if (res.type === 'move_back') {
+        this.dragStartSlot.occupy(this.draggingTank.level);
+      }
     }
-    // 清理拖拽状态
     this.draggingTank = null;
     this.dragStartSlot = null;
     this.dragOverSlot = null;
-    
+    this.dragOverSpotIndex = null;
   }
 
   spawnTank() {

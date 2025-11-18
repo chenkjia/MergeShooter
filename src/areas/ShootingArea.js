@@ -1,5 +1,7 @@
 const { styles } = require('../core/styles.js');
 const { ctx } = require('../core/context.js');
+const { drawTankWithBadge } = require('../core/draw.js');
+const { maxLevel } = require('../data/cannons.js');
 
 class ShootingArea {
   constructor(bounds) {
@@ -7,8 +9,12 @@ class ShootingArea {
     this.bounds = bounds;
     this.container = null;
     this.bg = null;
-    // 预计算的射击点中心集合（与炮塔列对齐）
     this.spots = [];
+    this.turretArea = null;
+    this.draggingTank = null;
+    this.dragStartSpotIndex = null;
+    this.dragOverSpotIndex = null;
+    this.dragOverSlot = null;
   }
 
   initialize() {
@@ -22,7 +28,7 @@ class ShootingArea {
     this.spots = [];
     for (let c = 0; c < cols; c++) {
       const x = startX + c * (cellW + spacing);
-      this.spots.push({ x, y: centerY });
+      this.spots.push({ x, y: centerY, tank: null });
     }
   }
 
@@ -64,7 +70,7 @@ class ShootingArea {
     const crossSize = Math.floor(Math.min(sw - inset * 2, sh - inset * 2) * 0.6);
     const barTh = 10; // 十字的横竖厚度固定为 10px
     for (let i = 0; i < this.spots.length; i++) {
-      const { x, y } = this.spots[i];
+      const { x, y, tank } = this.spots[i];
       const ix = Math.floor(x - sw / 2);
       const iy = Math.floor(y - sh / 2);
       // 外层圆角底座
@@ -80,23 +86,139 @@ class ShootingArea {
       ctx.fillRect(cx - half, cy - Math.floor(barTh / 2), crossSize, barTh);
       // 纵向矩形
       ctx.fillRect(cx - Math.floor(barTh / 2), cy - half, barTh, crossSize);
+      if (tank) {
+        drawTankWithBadge(x, y, tank.level, Math.min(sw, sh) - inset * 2);
+      }
     }
   }
 
-  update() {
-    // 射击区域当前无状态更新逻辑（预留）
+  update() {}
+
+  setTurretArea(area) {
+    this.turretArea = area;
   }
 
-  onTouchMove() {
-    // 触摸移动事件（预留）：可用于拖拽瞄准或特殊交互
+  containsPointInSpot(index, px, py) {
+    const sw = styles.shooting.spotWidth;
+    const sh = styles.shooting.spotHeight;
+    const halfW = sw / 2;
+    const halfH = sh / 2;
+    const sp = this.spots[index];
+    return px >= sp.x - halfW && px <= sp.x + halfW && py >= sp.y - halfH && py <= sp.y + halfH;
   }
 
-  onTouchStart() {
-    // 触摸开始事件（预留）
+  isSpotOccupied(index) {
+    const sp = this.spots[index];
+    return !!(sp && sp.tank);
+  }
+
+  occupySpot(index, level) {
+    const sp = this.spots[index];
+    if (sp) sp.tank = { level };
+  }
+
+  clearSpot(index) {
+    const sp = this.spots[index];
+    if (sp) sp.tank = null;
+  }
+
+  getSpotLevel(index) {
+    const sp = this.spots[index];
+    return sp && sp.tank ? sp.tank.level : null;
+  }
+
+  onTouchMove(touches) {
+    const t = touches && touches[0];
+    if (!t) return;
+    const x = t.clientX;
+    const y = t.clientY;
+    this.dragOverSpotIndex = null;
+    for (let i = 0; i < this.spots.length; i++) {
+      if (this.containsPointInSpot(i, x, y)) {
+        this.dragOverSpotIndex = i;
+        break;
+      }
+    }
+    this.dragOverSlot = null;
+    if (this.turretArea && Array.isArray(this.turretArea.slots)) {
+      for (let i = 0; i < this.turretArea.slots.length; i++) {
+        const s = this.turretArea.slots[i];
+        if (s.contains(x, y)) {
+          this.dragOverSlot = s;
+          s.setState('hover');
+        } else {
+          s.setState('default');
+        }
+      }
+    }
+    if (this.draggingTank) {
+      this.draggingTank.x = x;
+      this.draggingTank.y = y;
+    }
+  }
+
+  onTouchStart(touches) {
+    const t = touches && touches[0];
+    if (!t) return;
+    const x = t.clientX;
+    const y = t.clientY;
+    for (let i = 0; i < this.spots.length; i++) {
+      if (this.containsPointInSpot(i, x, y) && this.isSpotOccupied(i)) {
+        const sp = this.spots[i];
+        this.draggingTank = sp.tank;
+        this.dragStartSpotIndex = i;
+        sp.tank = null;
+        this.draggingTank.x = x;
+        this.draggingTank.y = y;
+        break;
+      }
+    }
   }
 
   onTouchEnd() {
-    // 触摸结束事件（预留）
+    if (!this.draggingTank) return;
+    if (this.dragOverSlot) {
+      if (!this.dragOverSlot.isOccupied()) {
+        this.dragOverSlot.occupy(this.draggingTank.level);
+      } else if (this.dragOverSlot.tank && this.dragOverSlot.tank.level === this.draggingTank.level) {
+        const next = Math.min(maxLevel, this.dragOverSlot.tank.level + 1);
+        if (next > this.dragOverSlot.tank.level) {
+          this.dragOverSlot.occupy(next);
+        } else {
+          const idx = this.dragStartSpotIndex;
+          this.occupySpot(idx, this.draggingTank.level);
+        }
+      } else {
+        const idx = this.dragStartSpotIndex;
+        this.occupySpot(idx, this.draggingTank.level);
+      }
+    } else if (this.dragOverSpotIndex !== null) {
+      const idx = this.dragOverSpotIndex;
+      if (!this.isSpotOccupied(idx)) {
+        this.occupySpot(idx, this.draggingTank.level);
+      } else {
+        const targetLevel = this.getSpotLevel(idx);
+        if (targetLevel === this.draggingTank.level) {
+          const next = Math.min(maxLevel, targetLevel + 1);
+          if (next > targetLevel) {
+            this.occupySpot(idx, next);
+          } else {
+            const si = this.dragStartSpotIndex;
+            this.occupySpot(si, this.draggingTank.level);
+          }
+        } else {
+          const si = this.dragStartSpotIndex;
+          this.occupySpot(si, this.draggingTank.level);
+        }
+      }
+    } else {
+      const si = this.dragStartSpotIndex;
+      this.occupySpot(si, this.draggingTank.level);
+    }
+    this.draggingTank = null;
+    this.dragStartSpotIndex = null;
+    this.dragOverSpotIndex = null;
+    this.dragOverSlot = null;
   }
 }
 

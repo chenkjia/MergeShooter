@@ -1,4 +1,6 @@
 const { systemInfo, resourceManager, ctx } = require('../core/context.js');
+const { drawTankWithBadge } = require('../core/draw.js');
+const { styles } = require('../core/styles.js');
 const { threeSliceRects } = require('../core/slices.js');
 const { computeAreaRects } = require('../core/layout.js');
 const TurretArea = require('../areas/TurretArea.js');
@@ -22,6 +24,8 @@ const gameScene = {
     this.shootingArea.initialize();
     this.turretArea = new TurretArea(rects.turret);
     this.turretArea.initialize();
+    this.turretArea.setShootingArea(this.shootingArea);
+    this.shootingArea.setTurretArea(this.turretArea);
     this.buttonArea = new ButtonArea(rects.buttons);
     this.buttonArea.initialize();
     on('button_click', this.handleBottomButtonClick.bind(this));
@@ -103,6 +107,14 @@ const gameScene = {
     if (this.shootingArea) this.shootingArea.draw();
     if (this.turretArea) this.turretArea.draw();
     if (this.buttonArea) this.buttonArea.draw();
+    if (this.turretArea && this.turretArea.draggingTank) {
+      const t = this.turretArea.draggingTank;
+      drawTankWithBadge(t.x, t.y, t.level, styles.turret.innerSize);
+    }
+    if (this.shootingArea && this.shootingArea.draggingTank) {
+      const t = this.shootingArea.draggingTank;
+      drawTankWithBadge(t.x, t.y, t.level, styles.turret.innerSize);
+    }
     this.drawMoney();
   },
 
@@ -114,7 +126,9 @@ const gameScene = {
   },
 
   onTouchStart(touches) {
-    // 先路由到炮塔区域以支持拾取拖拽，再路由到按钮区域处理点击
+    if (this.shootingArea && typeof this.shootingArea.onTouchStart === 'function') {
+      this.shootingArea.onTouchStart(touches);
+    }
     if (this.turretArea && typeof this.turretArea.onTouchStart === 'function') {
       this.turretArea.onTouchStart(touches);
     }
@@ -125,14 +139,21 @@ const gameScene = {
 
   update() {
     if (this.turretArea) this.turretArea.update();
+    if (this.shootingArea) this.shootingArea.update();
   },
   onTouchMove(touches) {
+    if (this.shootingArea && typeof this.shootingArea.onTouchMove === 'function') {
+      this.shootingArea.onTouchMove(touches);
+    }
     if (this.turretArea && typeof this.turretArea.onTouchMove === 'function') {
       this.turretArea.onTouchMove(touches);
     }
   },
   onTouchEnd(touches) {
     // 分发触摸结束事件，完成拖拽释放与按钮态复位
+    if (this.shootingArea && typeof this.shootingArea.onTouchEnd === 'function') {
+      this.shootingArea.onTouchEnd(touches);
+    }
     if (this.turretArea && typeof this.turretArea.onTouchEnd === 'function') {
       this.turretArea.onTouchEnd(touches);
     }
