@@ -1,5 +1,6 @@
 const { styles } = require('../core/styles.js');
 const { ctx, systemInfo, resourceManager } = require('../core/context.js');
+const { levels, maxLevel } = require('../data/cannons.js');
 const { on, emit } = require('../core/events.js');
 const TurretSlot = require('../entities/turretSlot.js');
 const { computeDropResult } = require('../core/mergeLogic.js');
@@ -51,7 +52,8 @@ class TurretArea {
     ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
     for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
     if (this.draggingTank) {
-      const tankImg = resourceManager.textures[`tank_level_${this.draggingTank.level}`];
+      const def = levels[this.draggingTank.level] || null;
+      const tankImg = def ? resourceManager.textures[def.textureKey] : null;
       if (tankImg) {
         const tankSize = styles.turret.innerSize * 0.8;
         ctx.drawImage(tankImg, this.draggingTank.x - tankSize / 2, this.draggingTank.y - tankSize / 2, tankSize, tankSize);

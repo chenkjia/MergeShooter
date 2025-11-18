@@ -107,6 +107,9 @@ const gameScene = {
   },
 
   onTouchStart(touches) {
+    if (this.turretArea && typeof this.turretArea.onTouchStart === 'function') {
+      this.turretArea.onTouchStart(touches);
+    }
     if (this.buttonArea && typeof this.buttonArea.onTouchStart === 'function') {
       this.buttonArea.onTouchStart(touches);
     }
@@ -120,7 +123,14 @@ const gameScene = {
       this.turretArea.onTouchMove(touches);
     }
   },
-  onTouchEnd() {},
+  onTouchEnd(touches) {
+    if (this.turretArea && typeof this.turretArea.onTouchEnd === 'function') {
+      this.turretArea.onTouchEnd(touches);
+    }
+    if (this.buttonArea && typeof this.buttonArea.onTouchEnd === 'function') {
+      this.buttonArea.onTouchEnd(touches);
+    }
+  },
   reset() {
     this.isInitialized = false;
     this.initialize();

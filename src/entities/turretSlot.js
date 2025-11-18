@@ -1,5 +1,6 @@
 const { turretSlotStyles, styles } = require('../core/styles.js');
 const { ctx, resourceManager } = require('../core/context.js');
+const { levels } = require('../data/cannons.js');
 
 class TurretSlot {
   constructor(x, y) {
@@ -54,7 +55,8 @@ class TurretSlot {
     ctx.closePath();
     ctx.fill();
     if (this.tank) {
-      const tankImg = resourceManager.textures[`tank_level_${this.tank.level}`];
+      const def = levels[this.tank.level] || null;
+      const tankImg = def ? resourceManager.textures[def.textureKey] : null;
       if (tankImg) {
         const tankSize = this.innerSize * 0.8;
         const x = this.x - tankSize / 2;
