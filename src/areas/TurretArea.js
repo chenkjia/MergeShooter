@@ -1,6 +1,7 @@
 const { styles } = require('../core/styles.js');
-const { ctx, systemInfo, resourceManager } = require('../core/context.js');
+const { ctx, systemInfo } = require('../core/context.js');
 const { levels, maxLevel } = require('../data/cannons.js');
+const { drawTankWithBadge } = require('../core/draw.js');
 const { on, emit } = require('../core/events.js');
 const TurretSlot = require('../entities/turretSlot.js');
 const { computeDropResult } = require('../core/mergeLogic.js');
@@ -61,12 +62,7 @@ class TurretArea {
     for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
     // 绘制拖拽中的炮塔贴图（随指针移动）
     if (this.draggingTank) {
-      const def = levels[this.draggingTank.level] || null;
-      const tankImg = def ? resourceManager.textures[def.textureKey] : null;
-      if (tankImg) {
-        const tankSize = styles.turret.innerSize * 0.8;
-        ctx.drawImage(tankImg, this.draggingTank.x - tankSize / 2, this.draggingTank.y - tankSize / 2, tankSize, tankSize);
-      }
+      drawTankWithBadge(this.draggingTank.x, this.draggingTank.y, this.draggingTank.level, styles.turret.innerSize);
     }
     for (let i = 0; i < this.tanks.length; i++) this.tanks[i].draw();
   }
@@ -115,6 +111,9 @@ class TurretArea {
         this.draggingTank = s.tank;
         this.dragStartSlot = s;
         s.tank = null;
+        this.draggingTank.x = x;
+        this.draggingTank.y = y;
+        s.setState('default');
         break;
       }
     }

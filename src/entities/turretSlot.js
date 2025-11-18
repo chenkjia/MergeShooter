@@ -1,6 +1,6 @@
 const { turretSlotStyles, styles } = require('../core/styles.js');
-const { ctx, resourceManager } = require('../core/context.js');
-const { levels } = require('../data/cannons.js');
+const { ctx } = require('../core/context.js');
+const { drawTankWithBadge } = require('../core/draw.js');
 
 class TurretSlot {
   constructor(x, y) {
@@ -56,16 +56,8 @@ class TurretSlot {
     ctx.arcTo(ix, iy, ix + this.innerSize, iy, r);
     ctx.closePath();
     ctx.fill();
-    // 绘制炮塔贴图（若槽位已占用）
     if (this.tank) {
-      const def = levels[this.tank.level] || null;
-      const tankImg = def ? resourceManager.textures[def.textureKey] : null;
-      if (tankImg) {
-        const tankSize = this.innerSize * 0.8;
-        const x = this.x - tankSize / 2;
-        const y = this.y - tankSize / 2;
-        ctx.drawImage(tankImg, x, y, tankSize, tankSize);
-      }
+      drawTankWithBadge(this.x, this.y, this.tank.level, this.innerSize);
     }
     // 状态边框（默认/悬停/占用）
     if (st.borderWidth > 0) {
