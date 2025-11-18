@@ -1,7 +1,7 @@
-import { turretSlotStyles, styles } from '../core/styles.js';
-import { pixiApp, ctx, resourceManager } from '../core/context.js';
+const { turretSlotStyles, styles } = require('../core/styles.js');
+const { ctx, resourceManager } = require('../core/context.js');
 
-export class TurretSlot {
+class TurretSlot {
   constructor(x, y) {
     this.x = x;
     this.y = y;
@@ -10,16 +10,13 @@ export class TurretSlot {
     this.innerSize = styles.turret.innerSize;
     this.innerRadius = styles.turret.innerRadius;
     this.display = null;
+    this.shape = null;
+    this.tankSprite = null;
     this.tank = null;
-    this.createDisplay();
+    
   }
 
-  createDisplay() {
-    if (pixiApp && typeof PIXI !== 'undefined') {
-      const g = new PIXI.Graphics();
-      this.display = g;
-    }
-  }
+  createDisplay() {}
 
   setState(s) {
     this.state = s;
@@ -72,35 +69,7 @@ export class TurretSlot {
     }
   }
 
-  drawPixi() {
-    if (!this.display) return;
-    const st = turretSlotStyles[this.state] || turretSlotStyles.default;
-    const g = this.display;
-    g.clear();
-    const halfOuter = this.outerSize / 2;
-    const halfInner = this.innerSize / 2;
-    g.beginFill(styles.colors.turretOuter);
-    g.drawRect(Math.floor(this.x - halfOuter), Math.floor(this.y - halfOuter), this.outerSize, this.outerSize);
-    g.endFill();
-    g.beginFill(styles.colors.turretInner);
-    g.drawRoundedRect(Math.floor(this.x - halfInner), Math.floor(this.y - halfInner), this.innerSize, this.innerSize, this.innerRadius);
-    g.endFill();
-    if (this.tank) {
-      const tankTexture = resourceManager.textures[`tank_level_${this.tank.level}`];
-      if (tankTexture) {
-        const tankSprite = new PIXI.Sprite(tankTexture);
-        const tankSize = this.innerSize * 0.8;
-        tankSprite.width = tankSize;
-        tankSprite.height = tankSize;
-        tankSprite.anchor.set(0.5);
-        tankSprite.x = this.x;
-        tankSprite.y = this.y;
-        g.addChild(tankSprite);
-      }
-    }
-    if (st.borderWidth > 0) {
-      g.lineStyle(st.borderWidth, st.borderColor, 1);
-      g.drawRect(Math.floor(this.x - halfOuter), Math.floor(this.y - halfOuter), this.outerSize, this.outerSize);
-    }
-  }
+  drawPixi() {}
 }
+
+module.exports = TurretSlot;

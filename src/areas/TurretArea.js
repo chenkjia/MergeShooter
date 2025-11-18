@@ -1,9 +1,10 @@
-import { styles } from '../core/styles.js';
-import { pixiApp, ctx, systemInfo } from '../core/context.js';
-import { on, emit } from '../core/events.js';
-import { TurretSlot } from '../entities/turretSlot.js';
+const { styles } = require('../core/styles.js');
+const { ctx, systemInfo, resourceManager } = require('../core/context.js');
+const { on, emit } = require('../core/events.js');
+const TurretSlot = require('../entities/turretSlot.js');
+const { computeDropResult } = require('../core/mergeLogic.js');
 
-export class TurretArea {
+class TurretArea {
   constructor(bounds) {
     this.bounds = bounds;
     this.container = null;
@@ -11,18 +12,12 @@ export class TurretArea {
     this.slots = [];
     this.tanks = [];
     this.draggingTank = null;
+    this.dragSprite = null;
     this.dragStartSlot = null;
     this.dragOverSlot = null;
   }
 
   initialize() {
-    if (pixiApp && typeof PIXI !== 'undefined') {
-      this.container = new PIXI.Container();
-      this.bg = new PIXI.Graphics();
-      this.container.addChild(this.bg);
-      this.container.zIndex = 30;
-      pixiApp.stage.addChild(this.container);
-    }
     this.createGrid();
     on('spawn_tank', this.spawnTank.bind(this));
   }
@@ -43,51 +38,26 @@ export class TurretArea {
         const y = startY + r * (cellW + spacing);
         const slot = new TurretSlot(x, y);
         this.slots.push(slot);
-        if (pixiApp && typeof PIXI !== 'undefined') {
-          this.container.addChild(slot.display);
-        }
+        
       }
     }
   }
 
   draw() {
-    if (pixiApp && typeof PIXI !== 'undefined') {
-      this.bg.clear();
-      this.bg.beginFill(styles.colors.turretBg);
-      this.bg.drawRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
-      this.bg.endFill();
-      this.bg.lineStyle(1, 0x000000, 0.2);
-      this.bg.drawRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
-      for (let i = 0; i < this.slots.length; i++) this.slots[i].drawPixi();
-      if (this.draggingTank) {
-        const tankTexture = resourceManager.textures[`tank_level_${this.draggingTank.level}`];
-        if (tankTexture) {
-          const tankSprite = new PIXI.Sprite(tankTexture);
-          const tankSize = styles.turret.innerSize * 0.8;
-          tankSprite.width = tankSize;
-          tankSprite.height = tankSize;
-          tankSprite.anchor.set(0.5);
-          tankSprite.x = this.draggingTank.x;
-          tankSprite.y = this.draggingTank.y;
-          this.container.addChild(tankSprite);
-        }
+    ctx.fillStyle = `#${styles.colors.turretBg.toString(16)}`;
+    ctx.fillRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
+    ctx.strokeStyle = '#00000033';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
+    for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
+    if (this.draggingTank) {
+      const tankImg = resourceManager.textures[`tank_level_${this.draggingTank.level}`];
+      if (tankImg) {
+        const tankSize = styles.turret.innerSize * 0.8;
+        ctx.drawImage(tankImg, this.draggingTank.x - tankSize / 2, this.draggingTank.y - tankSize / 2, tankSize, tankSize);
       }
-    } else {
-      ctx.fillStyle = `#${styles.colors.turretBg.toString(16)}`;
-      ctx.fillRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
-      ctx.strokeStyle = '#00000033';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
-      for (let i = 0; i < this.slots.length; i++) this.slots[i].drawCanvas();
-      if (this.draggingTank) {
-        const tankImg = resourceManager.textures[`tank_level_${this.draggingTank.level}`];
-        if (tankImg) {
-          const tankSize = styles.turret.innerSize * 0.8;
-          ctx.drawImage(tankImg, this.draggingTank.x - tankSize / 2, this.draggingTank.y - tankSize / 2, tankSize, tankSize);
-        }
-      }
-      for (let i = 0; i < this.tanks.length; i++) this.tanks[i].draw();
     }
+    for (let i = 0; i < this.tanks.length; i++) this.tanks[i].draw();
   }
 
   update() {
@@ -135,22 +105,18 @@ export class TurretArea {
     }
   }
   onTouchEnd() {
-    if (this.draggingTank && this.dragOverSlot) {
-      if (this.dragOverSlot.isOccupied()) {
-        if (this.dragOverSlot.tank.level === this.draggingTank.level) {
-          this.dragOverSlot.occupy(this.dragOverSlot.tank.level + 1);
-        } else {
-          this.dragStartSlot.occupy(this.draggingTank.level);
-        }
-      } else {
-        this.dragOverSlot.occupy(this.draggingTank.level);
-      }
-    } else if (this.draggingTank) {
+    const res = computeDropResult(this.draggingTank, this.dragStartSlot, this.dragOverSlot);
+    if (res.type === 'merge') {
+      this.dragOverSlot.occupy(res.level);
+    } else if (res.type === 'move_to') {
+      this.dragOverSlot.occupy(res.level);
+    } else if (res.type === 'move_back') {
       this.dragStartSlot.occupy(this.draggingTank.level);
     }
     this.draggingTank = null;
     this.dragStartSlot = null;
     this.dragOverSlot = null;
+    
   }
 
   spawnTank() {
@@ -160,3 +126,5 @@ export class TurretArea {
     }
   }
 }
+
+module.exports = TurretArea;

@@ -1,4 +1,4 @@
-export const styles = {
+const styles = {
   colors: {
     turretBg: 0x4ebdc4,
     turretOuter: 0x8fe1dd,
@@ -22,7 +22,7 @@ export const styles = {
   },
 };
 
-export const turretSlotStyles = {
+const turretSlotStyles = {
   default: {
     outerFill: 0x8fe1dd,
     innerFill: 0x49cdcf,
@@ -42,3 +42,5 @@ export const turretSlotStyles = {
     borderWidth: 3,
   },
 };
+
+module.exports = { styles, turretSlotStyles };

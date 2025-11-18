@@ -1,34 +1,20 @@
-import { systemInfo, pixiApp, resourceManager, ctx } from '../core/context.js';
-import { computeAreaRects } from '../core/layout.js';
-import { TurretArea } from '../areas/TurretArea.js';
-import { ButtonArea } from '../areas/ButtonArea.js';
-import { on, emit } from '../core/events.js';
+const { systemInfo, resourceManager, ctx } = require('../core/context.js');
+const { threeSliceRects } = require('../core/slices.js');
+const { computeAreaRects } = require('../core/layout.js');
+const TurretArea = require('../areas/TurretArea.js');
+const ButtonArea = require('../areas/ButtonArea.js');
+const { on, emit } = require('../core/events.js');
 
 const gameState = { bottomButtons: [], money: 10000 };
 
-export const gameScene = {
+const gameScene = {
   isInitialized: false,
-  container: null,
-  bgRect: null,
-  moneyBarSprite: null,
-  moneyText: null,
   turretArea: null,
   buttonArea: null,
   initialize() {
     if (this.isInitialized) return;
     const screenWidth = systemInfo.windowWidth;
     const screenHeight = systemInfo.windowHeight;
-    if (pixiApp && typeof PIXI !== 'undefined' && !this.container) {
-      this.container = new PIXI.Container();
-      this.bgRect = new PIXI.Graphics();
-      this.moneyBarSprite = new PIXI.Sprite(resourceManager.textures.money_bar);
-      this.moneyText = new PIXI.Text('', {fontFamily: 'Helvetica', fontSize: 24, fontWeight: 'bold', fill: 0xFFFFFF, stroke: 0x000000, strokeThickness: 3});
-      this.moneyText.anchor.set(1, 0.5);
-      this.container.addChild(this.bgRect);
-      this.container.addChild(this.moneyBarSprite);
-      this.container.addChild(this.moneyText);
-      pixiApp.stage.addChild(this.container);
-    }
     const rects = computeAreaRects(screenWidth, screenHeight);
     this.turretArea = new TurretArea(rects.turret);
     this.turretArea.initialize();
@@ -45,52 +31,31 @@ export const gameScene = {
     const barX = 0;
     const barY = 10;
     const text = gameState.money.toString();
-    if (pixiApp && typeof PIXI !== 'undefined' && this.moneyBarSprite) {
-      const barHeight = this.moneyBarSprite.texture.height * scale;
-      this.moneyBarSprite.x = barX;
-      this.moneyBarSprite.y = barY;
-      this.moneyBarSprite.height = barHeight;
-      const horizontalPadding = 10;
-      this.moneyText.style.fontSize = Math.floor(barHeight * 0.6);
-      this.moneyText.text = text;
-      const totalWidth = this.moneyText.width + horizontalPadding * 2 + barHeight;
-      this.moneyBarSprite.width = totalWidth;
-      this.moneyText.x = barX + totalWidth - horizontalPadding;
-      this.moneyText.y = barY + barHeight / 2;
-    } else {
-      const img = resourceManager.textures.money_bar;
-      if (!img) return;
-      const barHeight = img.height * scale;
-      const horizontalPadding = 10;
-      ctx.font = `bold ${Math.floor(barHeight * 0.6)}px Helvetica`;
-      const textMetrics = ctx.measureText(text);
-      const textWidth = textMetrics.width;
-      const totalWidth = barHeight + textWidth + horizontalPadding * 2;
-      this.drawThreeSlice(img, barX, barY, totalWidth, barHeight, img.height);
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 3;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      const textX = barX + totalWidth - horizontalPadding;
-      const textY = barY + barHeight / 2;
-      ctx.strokeText(text, textX, textY);
-      ctx.fillText(text, textX, textY);
+    const img = resourceManager.textures.money_bar;
+    if (!img) return;
+    const barHeight = img.height * scale;
+    const horizontalPadding = 10;
+    ctx.font = `bold ${Math.floor(barHeight * 0.6)}px Helvetica`;
+    const textMetrics = ctx.measureText(text);
+    const textWidth = textMetrics.width;
+    const totalWidth = barHeight + textWidth + horizontalPadding * 2;
+    const rects = threeSliceRects(img.width, img.height, totalWidth, barHeight, img.height);
+    for (let k = 0; k < rects.length; k++) {
+      const r = rects[k];
+      ctx.drawImage(img, r.sx, r.sy, r.sw, r.sh, barX + r.dx, barY + r.dy, r.dw, r.dh);
     }
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    const textX = barX + totalWidth - horizontalPadding;
+    const textY = barY + barHeight / 2;
+    ctx.strokeText(text, textX, textY);
+    ctx.fillText(text, textX, textY);
   },
 
-  drawThreeSlice(img, dx, dy, dw, dh, sliceWidth) {
-    const img_sw = img.width;
-    const img_sh = img.height;
-    const cap_dw = sliceWidth * (dh / img_sh);
-    ctx.drawImage(img, 0, 0, sliceWidth, img_sh, dx, dy, cap_dw, dh);
-    const middle_sw = img_sw - sliceWidth * 2;
-    const middle_dw = dw - cap_dw * 2;
-    if (middle_dw > 0) {
-      ctx.drawImage(img, sliceWidth, 0, middle_sw, img_sh, dx + cap_dw, dy, middle_dw, dh);
-    }
-    ctx.drawImage(img, img_sw - sliceWidth, 0, sliceWidth, img_sh, dx + dw - cap_dw, dy, cap_dw, dh);
-  },
+  drawThreeSlice() {},
 
 
   drawNineSlice(img, dx, dy, dw, dh, s) {
@@ -122,24 +87,16 @@ export const gameScene = {
 
   
 
+  
+
   draw() {
     if (!this.isInitialized) this.initialize();
-    if (pixiApp && typeof PIXI !== 'undefined') {
-      this.bgRect.clear();
-      this.bgRect.beginFill(0x44a5c8);
-      this.bgRect.drawRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
-      this.bgRect.endFill();
-      if (this.turretArea) this.turretArea.draw();
-      if (this.buttonArea) this.buttonArea.draw();
-      this.drawMoney();
-    } else {
-      ctx.clearRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
-      ctx.fillStyle = '#44a5c8';
-      ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
-      if (this.turretArea) this.turretArea.draw();
-      if (this.buttonArea) this.buttonArea.draw();
-      this.drawMoney();
-    }
+    ctx.clearRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    ctx.fillStyle = '#44a5c8';
+    ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    if (this.turretArea) this.turretArea.draw();
+    if (this.buttonArea) this.buttonArea.draw();
+    this.drawMoney();
   },
 
   handleBottomButtonClick(button) {
@@ -170,3 +127,5 @@ export const gameScene = {
     this.isInitialized = true;
   }
 };
+
+module.exports = gameScene;

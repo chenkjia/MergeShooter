@@ -1,19 +1,12 @@
-export const systemInfo = tt.getSystemInfoSync();
-export const canvas = tt.createCanvas();
+import { getSystemInfoSync, createCanvas, createImage, mountCanvas } from '../adapter/adapter.js';
+export const systemInfo = getSystemInfoSync();
+export const canvas = createCanvas();
 const __pr = systemInfo.pixelRatio || 1;
 canvas.width = Math.round(systemInfo.windowWidth * __pr);
 canvas.height = Math.round(systemInfo.windowHeight * __pr);
-export const ctx = canvas.getContext('2d');
+export const ctx = canvas.getContext ? canvas.getContext('2d') : null;
 if (ctx && __pr && __pr !== 1) { ctx.scale(__pr, __pr); }
-export const pixiApp = (typeof PIXI !== 'undefined') ? new PIXI.Application({
-  view: canvas,
-  width: systemInfo.windowWidth,
-  height: systemInfo.windowHeight,
-  resolution: __pr,
-  autoDensity: true,
-  backgroundAlpha: 1,
-  antialias: true,
-}) : null;
+mountCanvas(canvas, systemInfo.windowWidth, systemInfo.windowHeight);
 
 const pr = systemInfo.pixelRatio || 1;
 const lsW = systemInfo.screenWidth;
@@ -68,27 +61,19 @@ export const resourceManager = {
     const imagePaths = Object.values(resources);
     const imageKeys = Object.keys(resources);
     let loadedCount = 0;
-    if (imagePaths.length === 0) {
-      callback();
-      return;
-    }
+    if (imagePaths.length === 0) { callback(); return; }
     imagePaths.forEach((path, index) => {
       const key = imageKeys[index];
-      const image = tt.createImage();
+      const image = createImage();
       image.src = path;
       image.onload = () => {
-        if (typeof PIXI !== 'undefined') {
-          this.textures[key] = PIXI.Texture.from(image);
-        } else {
-          this.textures[key] = image;
-        }
+        this.textures[key] = image;
         loadedCount++;
-        if (loadedCount === imagePaths.length) {
-          callback();
-        }
+        if (loadedCount === imagePaths.length) callback();
       };
-      image.onerror = (err) => {
-        console.error(`图片加载失败: ${path}`, err);
+      image.onerror = () => {
+        loadedCount++;
+        if (loadedCount === imagePaths.length) callback();
       };
     });
   }

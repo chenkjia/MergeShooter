@@ -1,12 +1,9 @@
-import { startScene } from './src/scenes/startScene.js';
-import { gameScene } from './src/scenes/gameScene.js';
-import { systemInfo, canvas, pixiApp, resourceManager } from './src/core/context.js';
+const gameScene = require('./src/scenes/gameScene.js');
+const { systemInfo, resourceManager } = require('./src/core/context.js');
+const { onTouchStart, onTouchMove, onTouchEnd, raf } = require('./src/adapter/adapter.js');
 
 const sceneManager = {
-  scenes: {
-    start: startScene,
-    game: gameScene,
-  },
+  scenes: { game: gameScene },
   activeScene: null,
   switchScene(sceneName) {
     if (this.scenes[sceneName]) {
@@ -45,28 +42,25 @@ const sceneManager = {
   },
 };
 
-tt.onTouchStart(({ touches }) => {
+onTouchStart(({ touches }) => {
   sceneManager.onTouchStart(touches);
 });
 
-tt.onTouchMove(({ touches }) => {
+onTouchMove(({ touches }) => {
   sceneManager.onTouchMove(touches);
 });
 
-tt.onTouchEnd(({ touches }) => {
+onTouchEnd(({ touches }) => {
   sceneManager.onTouchEnd(touches);
 });
 
 function gameLoop() {
   sceneManager.update();
   sceneManager.draw();
-  if (pixiApp && pixiApp.renderer && pixiApp.stage) {
-    pixiApp.renderer.render(pixiApp.stage);
-  }
-  requestAnimationFrame(gameLoop);
+  raf(gameLoop);
 }
 
 resourceManager.load(() => {
-  sceneManager.switchScene('start');
+  sceneManager.switchScene('game');
   gameLoop();
 });
