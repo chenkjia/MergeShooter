@@ -1,6 +1,7 @@
-const { ctx } = require('../core/context.js');
+const { ctx, resourceManager } = require('../core/context.js');
 const { styles } = require('../core/styles.js');
 const PathMonster = require('../entities/pathMonster.js');
+const Bullet = require('../entities/bullet.js');
 
 /**
  * 怪物路径区域类
@@ -49,8 +50,9 @@ class MonsterPathArea {
     this.maxPlayerHealth = 100;
     this.playerHealth = this.maxPlayerHealth;
     
-    // 爆炸效果管理
     this.explosions = [];
+    this.bullets = [];
+    this.lastFireTimes = {};
     this.lastUpdateTime = Date.now();
     
     this.initializePaths();
@@ -137,8 +139,8 @@ class MonsterPathArea {
       ctx.lineWidth = this.pathBorderWidth;
     });
     
-    // 绘制路径上的怪物
     this.drawMonsters();
+    this.drawBullets();
     
     // 绘制爆炸动画
     this.drawExplosions();
@@ -253,7 +255,9 @@ class MonsterPathArea {
     }
     this.allMonsters = nextMonsters;
 
-    // 更新并清理爆炸动画对象
+    this.fireBullets();
+    this.updateBullets(dtSec > 0 ? dtSec : 0.016);
+
     this.updateExplosions(dtSec > 0 ? dtSec : 0.016);
   }
 
@@ -361,6 +365,95 @@ class MonsterPathArea {
     });
     this.explosions.push(exp);
     return exp;
+  }
+
+  setShootingArea(area) {
+    this.shootingArea = area;
+  }
+
+  getMonsters() {
+    return this.allMonsters;
+  }
+
+  drawBullets() {
+    if (!ctx) return;
+    for (let i = 0; i < this.bullets.length; i++) {
+      const b = this.bullets[i];
+      try { b.draw(ctx); } catch (e) {}
+    }
+  }
+
+  fireBullets() {
+    if (!this.shootingArea || !Array.isArray(this.shootingArea.spots)) return;
+    const now = Date.now();
+    for (let i = 0; i < this.shootingArea.spots.length; i++) {
+      const sp = this.shootingArea.spots[i];
+      if (!sp || !sp.tank) continue;
+      const level = sp.tank.level || 1;
+      const intervalMs = 1000;
+      const last = this.lastFireTimes[i] || 0;
+      if (now - last < intervalMs) continue;
+      const target = this.pickTargetForSpot(sp);
+      if (!target) continue;
+      const typeIdx = ((level - 1) % 4) + 1;
+      const tex = resourceManager && resourceManager.textures ? resourceManager.textures[`bullet_${typeIdx}`] : null;
+      const speedMap = { 1: 420, 2: 380, 3: 440, 4: 360 };
+      const radiusMap = { 1: 12, 2: 12, 3: 12, 4: 12 };
+      const b = new Bullet(sp.x, sp.y, target.x, target.y, { speed: speedMap[typeIdx], damage: 10 * level, radius: radiusMap[typeIdx], type: typeIdx, texture: tex });
+      this.bullets.push(b);
+      this.lastFireTimes[i] = now;
+    }
+  }
+
+  pickTargetForSpot(sp) {
+    const path = this.getNearestPath(sp.x);
+    if (!path) return null;
+    let best = null;
+    let bestD = Infinity;
+    for (let i = 0; i < this.allMonsters.length; i++) {
+      const m = this.allMonsters[i];
+      if (!m || !m.isAlive() || m.reachedEnd) continue;
+      if (m.pathIndex !== path.index) continue;
+      const dx = m.x - sp.x;
+      const dy = m.y - sp.y;
+      const d = Math.hypot(dx, dy);
+      if (d < bestD) { bestD = d; best = m; }
+    }
+    return best;
+  }
+
+  updateBullets(dt) {
+    const next = [];
+    for (let i = 0; i < this.bullets.length; i++) {
+      const b = this.bullets[i];
+      try {
+        b.update(dt);
+        let hit = false;
+        for (let j = 0; j < this.allMonsters.length; j++) {
+          const m = this.allMonsters[j];
+          if (!m || !m.isAlive() || m.reachedEnd) continue;
+          const dx = m.x - b.x;
+          const dy = m.y - b.y;
+          const d = Math.hypot(dx, dy);
+          if (d <= (b.radius + Math.max(8, Math.min(m.width, m.height) * 0.25))) {
+            m.takeDamage(b.damage);
+            hit = true;
+            if (!m.isAlive()) {
+              this.createExplosion(m.x, m.y, { scale: 0.6, animationSpeed: 0.08 });
+            }
+            break;
+          }
+        }
+        if (!hit) next.push(b);
+      } catch (e) {}
+    }
+    this.bullets = next;
+    const alive = [];
+    for (let k = 0; k < this.allMonsters.length; k++) {
+      const m = this.allMonsters[k];
+      if (m && m.isAlive() && !m.reachedEnd) alive.push(m);
+    }
+    this.allMonsters = alive;
   }
 
   /**

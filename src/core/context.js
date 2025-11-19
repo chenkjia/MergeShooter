@@ -74,6 +74,11 @@ const resources = {
   explosion_17: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_17.png',
   explosion_18: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_18.png',
   explosion_19: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_19.png',
+
+  bullet_1: 'src/assets/bullets/1.png',
+  bullet_2: 'src/assets/bullets/2.png',
+  bullet_3: 'src/assets/bullets/3.png',
+  bullet_4: 'src/assets/bullets/4.png',
   
   // 怪物精灵图资源
   monster01_00: 'src/assets/monsters/animations/Monster01/Monster01-animation_00.png',

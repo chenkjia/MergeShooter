@@ -32,6 +32,7 @@ const gameScene = {
     this.turretArea = new TurretArea(rects.turret);
     this.turretArea.initialize();
     this.turretArea.setShootingArea(this.shootingArea);
+    this.monsterPathArea.setShootingArea(this.shootingArea);
     this.shootingArea.setTurretArea(this.turretArea);
     this.buttonArea = new ButtonArea(rects.buttons);
     this.buttonArea.initialize();
