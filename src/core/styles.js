@@ -44,7 +44,7 @@ const turretSlotStyles = {
     outerFill: 0x8fe1dd,
     innerFill: 0x49cdcf,
     borderColor: 0xffd700,
-    borderWidth: 3,
+    borderWidth: 1,
   },
 };
 

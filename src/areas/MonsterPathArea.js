@@ -21,7 +21,7 @@ class MonsterPathArea {
     // 路径样式
     this.pathColor = '#5a98c4';
     this.pathBorderColor = '#4a88b4';
-    this.pathBorderWidth = 2;
+    this.pathBorderWidth = 6;
     
     // 怪物相关
     this.monsters = []; // 存储路径上的怪物
@@ -130,12 +130,6 @@ class MonsterPathArea {
       ctx.beginPath();
       ctx.moveTo(path.centerX, path.y);
       ctx.lineTo(path.centerX, path.y + path.height);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([5, 5]);
-      ctx.stroke();
-      ctx.setLineDash([]); // 重置虚线
-      ctx.strokeStyle = this.pathBorderColor; // 恢复边框颜色
       ctx.lineWidth = this.pathBorderWidth;
     });
     
