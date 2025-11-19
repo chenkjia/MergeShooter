@@ -6,6 +6,7 @@ const { computeAreaRects } = require('../core/layout.js');
 const TurretArea = require('../areas/TurretArea.js');
 const ButtonArea = require('../areas/ButtonArea.js');
 const ShootingArea = require('../areas/ShootingArea.js');
+const MonsterPathArea = require('../areas/MonsterPathArea.js');
 const { on, emit } = require('../core/events.js');
 
 const gameState = { bottomButtons: [], money: 10000 };
@@ -15,11 +16,17 @@ const gameScene = {
   turretArea: null,
   buttonArea: null,
   shootingArea: null,
+  monsterPathArea: null,
   initialize() {
     if (this.isInitialized) return;
     const screenWidth = systemInfo.windowWidth;
     const screenHeight = systemInfo.windowHeight;
     const rects = computeAreaRects(screenWidth, screenHeight);
+    
+    // 初始化怪物路径区域
+    this.monsterPathArea = new MonsterPathArea(rects.monster);
+    this.monsterPathArea.initialize();
+    
     this.shootingArea = new ShootingArea(rects.shooting);
     this.shootingArea.initialize();
     this.turretArea = new TurretArea(rects.turret);
@@ -102,8 +109,14 @@ const gameScene = {
     if (!this.isInitialized) this.initialize();
     ctx.clearRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
     if (ctx && typeof ctx.setLineDash === 'function') ctx.setLineDash([]);
-    ctx.fillStyle = '#5a98c4';
-    ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    
+    // 绘制怪物路径区域（使用MonsterPathArea的绘制逻辑）
+    if (this.monsterPathArea) this.monsterPathArea.draw();
+    
+    // 注意：移除原来的背景填充，因为MonsterPathArea会处理自己的背景
+    // ctx.fillStyle = '#5a98c4';
+    // ctx.fillRect(0, 0, systemInfo.windowWidth, systemInfo.windowHeight);
+    
     if (this.shootingArea) this.shootingArea.draw();
     if (this.turretArea) this.turretArea.draw();
     if (this.buttonArea) this.buttonArea.draw();
@@ -126,6 +139,9 @@ const gameScene = {
   },
 
   onTouchStart(touches) {
+    if (this.monsterPathArea && typeof this.monsterPathArea.onTouchStart === 'function') {
+      this.monsterPathArea.onTouchStart(touches);
+    }
     if (this.shootingArea && typeof this.shootingArea.onTouchStart === 'function') {
       this.shootingArea.onTouchStart(touches);
     }
@@ -138,10 +154,14 @@ const gameScene = {
   },
 
   update() {
+    if (this.monsterPathArea) this.monsterPathArea.update();
     if (this.turretArea) this.turretArea.update();
     if (this.shootingArea) this.shootingArea.update();
   },
   onTouchMove(touches) {
+    if (this.monsterPathArea && typeof this.monsterPathArea.onTouchMove === 'function') {
+      this.monsterPathArea.onTouchMove(touches);
+    }
     if (this.shootingArea && typeof this.shootingArea.onTouchMove === 'function') {
       this.shootingArea.onTouchMove(touches);
     }
@@ -151,6 +171,9 @@ const gameScene = {
   },
   onTouchEnd(touches) {
     // 分发触摸结束事件，完成拖拽释放与按钮态复位
+    if (this.monsterPathArea && typeof this.monsterPathArea.onTouchEnd === 'function') {
+      this.monsterPathArea.onTouchEnd(touches);
+    }
     if (this.shootingArea && typeof this.shootingArea.onTouchEnd === 'function') {
       this.shootingArea.onTouchEnd(touches);
     }
