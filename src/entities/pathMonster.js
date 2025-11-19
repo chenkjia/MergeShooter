@@ -175,19 +175,6 @@ class PathMonster {
     
     // 沿路径向下移动（向炮台方向）- 降低移动速度
     this.y += this.speed;
-    
-    // 检查是否到达终点（接近炮塔区域顶部）
-    // 怪物区域占60%高度，炮塔区域占20%高度
-    // 当怪物接近怪物区域底部时视为到达终点
-    if (this.y > 480) { // 稍微调整终点位置
-      this.reachedEnd = true;
-      this.alive = false;
-      console.log(`路径${this.pathIndex}的怪物到达终点！准备攻击炮塔！`);
-      
-      // 这里可以触发对炮塔的攻击逻辑
-      // 或者对玩家造成伤害
-      return;
-    }
   }
 
   /**

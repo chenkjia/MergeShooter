@@ -45,6 +45,14 @@ class MonsterPathArea {
     this.waveStartTime = Date.now();
     this.isWaveActive = true;
     
+    // 玩家生命值（用于爆炸完成时结算伤害）
+    this.maxPlayerHealth = 100;
+    this.playerHealth = this.maxPlayerHealth;
+    
+    // 爆炸效果管理
+    this.explosions = [];
+    this.lastUpdateTime = Date.now();
+    
     this.initializePaths();
   }
 
@@ -131,6 +139,9 @@ class MonsterPathArea {
     
     // 绘制路径上的怪物
     this.drawMonsters();
+    
+    // 绘制爆炸动画
+    this.drawExplosions();
   }
 
   /**
@@ -141,6 +152,20 @@ class MonsterPathArea {
     this.allMonsters.forEach(monster => {
       if (monster.isAlive()) {
         monster.draw();
+      }
+    });
+  }
+
+  /**
+   * 绘制爆炸动画
+   */
+  drawExplosions() {
+    if (!ctx) return;
+    this.explosions.forEach(exp => {
+      try {
+        exp.draw(ctx);
+      } catch (e) {
+        // 忽略绘制错误以保证流畅性
       }
     });
   }
@@ -185,6 +210,8 @@ class MonsterPathArea {
    */
   update(deltaTime) {
     const currentTime = Date.now();
+    const dtSec = (currentTime - this.lastUpdateTime) / 1000;
+    this.lastUpdateTime = currentTime;
     
     // 检查波次状态
     this.checkWaveStatus();
@@ -199,14 +226,35 @@ class MonsterPathArea {
       }
     }
     
-    // 更新所有怪物位置
-    this.allMonsters = this.allMonsters.filter(monster => {
+    // 更新所有怪物位置与射击区接触检测
+    const nextMonsters = [];
+    for (let i = 0; i < this.allMonsters.length; i++) {
+      const monster = this.allMonsters[i];
       if (monster.isAlive() && !monster.reachedEnd) {
         monster.update();
-        return true; // 保留存活的怪物
+        // 精确检测怪物是否接触射击台边界
+        if (this.checkMonsterReachedShootingArea(monster)) {
+          if (!monster.exploded) {
+            monster.exploded = true;
+            // 触发爆炸：立即清除怪物对象
+            monster.reachedEnd = true;
+            monster.alive = false;
+            const dmg = this.getDamageByMonsterType(monster.type);
+            this.createExplosion(monster.x, monster.y, {
+              scale: 0.5,
+              animationSpeed: 0.08,
+              damageOnComplete: dmg
+            });
+          }
+        } else {
+          nextMonsters.push(monster);
+        }
       }
-      return false; // 移除死亡或到达终点的怪物
-    });
+    }
+    this.allMonsters = nextMonsters;
+
+    // 更新并清理爆炸动画对象
+    this.updateExplosions(dtSec > 0 ? dtSec : 0.016);
   }
 
   /**
@@ -255,6 +303,77 @@ class MonsterPathArea {
     this.monsterCounter++;
     
     console.log(`生成怪物 #${this.monsterCounter}: 类型=${type}, 路径=${pathIndex}, 位置=(${monsterX}, ${monsterY}), 速度=${monsterData.speed} [第${this.waveNumber}波 ${this.monstersSpawnedInWave+1}/${this.monstersInWave}]`);
+  }
+
+  /**
+   * 怪物是否接触到射击台（使用精确AABB下边界判定）
+   */
+  checkMonsterReachedShootingArea(monster) {
+    const monsterBottom = monster.y + (monster.height || 0) / 2;
+    const boundaryTop = this.bounds.y + this.bounds.height;
+    const threshold = 10; // 容差，提高判定稳定性
+    return monsterBottom >= boundaryTop - threshold;
+  }
+
+  /**
+   * 根据怪物类型获取伤害值
+   */
+  getDamageByMonsterType(type) {
+    switch (type) {
+      case 'fast': return 5;
+      case 'tank': return 15;
+      default: return 10;
+    }
+  }
+
+  /**
+   * 造成玩家伤害（在爆炸动画播放完毕时触发）
+   */
+  damagePlayer(amount) {
+    const dmg = Math.max(0, amount || 0);
+    this.playerHealth = Math.max(0, this.playerHealth - dmg);
+    return this.playerHealth;
+  }
+
+  /**
+   * 创建爆炸效果
+   */
+  createExplosion(x, y, opts = {}) {
+    const Explosion = require('../entities/explosion.js');
+    const scale = opts.scale || 0.5;
+    const speed = opts.animationSpeed || 0.08;
+    const dmg = opts.damageOnComplete || 0;
+    const exp = new Explosion(x, y, {
+      scale,
+      animationSpeed: speed,
+      onComplete: () => {
+        try {
+          this.damagePlayer(dmg);
+        } finally {
+          // 动画完成后移除自身
+          this.explosions = this.explosions.filter(e => e !== exp);
+        }
+      }
+    });
+    this.explosions.push(exp);
+    return exp;
+  }
+
+  /**
+   * 更新爆炸动画并进行内存清理
+   */
+  updateExplosions(deltaTimeSec) {
+    const active = [];
+    for (let i = 0; i < this.explosions.length; i++) {
+      const exp = this.explosions[i];
+      try {
+        exp.update(deltaTimeSec);
+        if (!exp.isComplete) active.push(exp);
+      } catch (e) {
+        // 出错时直接丢弃，保证游戏流畅
+      }
+    }
+    this.explosions = active;
   }
 
   /**

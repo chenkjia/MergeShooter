@@ -53,6 +53,28 @@ const resources = {
   shield_icon: 'src/assets/ui/buttons/shield_icon.png',
   tank_icon: 'src/assets/ui/buttons/tank_icon.png',
   
+  // 爆炸动画资源（Dead FX），统一管理于 assets 目录
+  explosion_00: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_00.png',
+  explosion_01: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_01.png',
+  explosion_02: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_02.png',
+  explosion_03: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_03.png',
+  explosion_04: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_04.png',
+  explosion_05: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_05.png',
+  explosion_06: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_06.png',
+  explosion_07: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_07.png',
+  explosion_08: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_08.png',
+  explosion_09: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_09.png',
+  explosion_10: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_10.png',
+  explosion_11: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_11.png',
+  explosion_12: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_12.png',
+  explosion_13: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_13.png',
+  explosion_14: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_14.png',
+  explosion_15: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_15.png',
+  explosion_16: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_16.png',
+  explosion_17: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_17.png',
+  explosion_18: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_18.png',
+  explosion_19: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_19.png',
+  
   // 怪物精灵图资源
   monster01_00: 'src/assets/monsters/animations/Monster01/Monster01-animation_00.png',
   monster01_01: 'src/assets/monsters/animations/Monster01/Monster01-animation_01.png',
