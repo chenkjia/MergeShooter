@@ -36,6 +36,16 @@ const resources = {
   tank_level_8: 'src/assets/tanks/guns/Gun08-Idle_0.png',
   tank_level_9: 'src/assets/tanks/guns/Gun09-Idle_0.png',
   tank_level_10: 'src/assets/tanks/guns/Gun10-Idle_0.png',
+  tank_level_11: 'src/assets/tanks/guns/Gun11-Idle_0.png',
+  tank_level_12: 'src/assets/tanks/guns/Gun12-Idle_0.png',
+  tank_level_13: 'src/assets/tanks/guns/Gun13-Idle_0.png',
+  tank_level_14: 'src/assets/tanks/guns/Gun14-Idle_0.png',
+  tank_level_15: 'src/assets/tanks/guns/Gun15-Idle_0.png',
+  tank_level_16: 'src/assets/tanks/guns/Gun16-Idle_0.png',
+  tank_level_17: 'src/assets/tanks/guns/Gun17-Idle_0.png',
+  tank_level_18: 'src/assets/tanks/guns/Gun18-Idle_0.png',
+  tank_level_19: 'src/assets/tanks/guns/Gun19-Idle_0.png',
+  tank_level_20: 'src/assets/tanks/guns/Gun20-Idle_0.png',
   // 底部按钮图片 - 已复制到assets目录
   bottom_button_01: 'src/assets/ui/buttons/btn01.png',
   bottom_button_01_pressed: 'src/assets/ui/buttons/btn01 pressed.png',
@@ -79,6 +89,10 @@ const resources = {
   bullet_2: 'src/assets/bullets/2.png',
   bullet_3: 'src/assets/bullets/3.png',
   bullet_4: 'src/assets/bullets/4.png',
+  bullet_5: 'src/assets/bullets/5.png',
+  bullet_6: 'src/assets/bullets/6.png',
+  bullet_7: 'src/assets/bullets/7.png',
+  bullet_8: 'src/assets/bullets/8.png',
   
   // 怪物精灵图资源
   monster01_00: 'src/assets/monsters/animations/Monster01/Monster01-animation_00.png',

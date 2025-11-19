@@ -1,0 +1,285 @@
+{
+  "maxLevel": 20,
+  "guns": [
+    {
+      "id": 1,
+      "name": "Gun01",
+      "attack": 10,
+      "attackSpeed": 1.0,
+      "range": 150,
+      "bulletCount": 1,
+      "bulletType": 1,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun01-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun01-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Gun02",
+      "attack": 15,
+      "attackSpeed": 1.0,
+      "range": 155,
+      "bulletCount": 1,
+      "bulletType": 2,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun02-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun02-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 3,
+      "name": "Gun03",
+      "attack": 20,
+      "attackSpeed": 0.95,
+      "range": 160,
+      "bulletCount": 1,
+      "bulletType": 3,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun03-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun03-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 4,
+      "name": "Gun04",
+      "attack": 26,
+      "attackSpeed": 0.95,
+      "range": 165,
+      "bulletCount": 1,
+      "bulletType": 4,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun04-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun04-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 5,
+      "name": "Gun05",
+      "attack": 33,
+      "attackSpeed": 0.9,
+      "range": 170,
+      "bulletCount": 1,
+      "bulletType": 5,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun05-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun05-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 6,
+      "name": "Gun06",
+      "attack": 41,
+      "attackSpeed": 0.9,
+      "range": 175,
+      "bulletCount": 1,
+      "bulletType": 6,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun06-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun06-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 7,
+      "name": "Gun07",
+      "attack": 50,
+      "attackSpeed": 0.85,
+      "range": 180,
+      "bulletCount": 1,
+      "bulletType": 7,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun07-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun07-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 8,
+      "name": "Gun08",
+      "attack": 60,
+      "attackSpeed": 0.85,
+      "range": 185,
+      "bulletCount": 1,
+      "bulletType": 8,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun08-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun08-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 9,
+      "name": "Gun09",
+      "attack": 72,
+      "attackSpeed": 0.8,
+      "range": 190,
+      "bulletCount": 2,
+      "bulletType": 1,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun09-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun09-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 10,
+      "name": "Gun10",
+      "attack": 85,
+      "attackSpeed": 0.8,
+      "range": 195,
+      "bulletCount": 2,
+      "bulletType": 2,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun10-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun10-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 11,
+      "name": "Gun11",
+      "attack": 99,
+      "attackSpeed": 0.75,
+      "range": 200,
+      "bulletCount": 2,
+      "bulletType": 3,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun11-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun11-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9]
+      }
+    },
+    {
+      "id": 12,
+      "name": "Gun12",
+      "attack": 114,
+      "attackSpeed": 0.7,
+      "range": 205,
+      "bulletCount": 2,
+      "bulletType": 4,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun12-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun12-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 13,
+      "name": "Gun13",
+      "attack": 130,
+      "attackSpeed": 0.7,
+      "range": 210,
+      "bulletCount": 3,
+      "bulletType": 5,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun13-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun13-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 14,
+      "name": "Gun14",
+      "attack": 147,
+      "attackSpeed": 0.65,
+      "range": 215,
+      "bulletCount": 3,
+      "bulletType": 6,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun14-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun14-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 15,
+      "name": "Gun15",
+      "attack": 165,
+      "attackSpeed": 0.65,
+      "range": 220,
+      "bulletCount": 3,
+      "bulletType": 7,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun15-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun15-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 16,
+      "name": "Gun16",
+      "attack": 184,
+      "attackSpeed": 0.6,
+      "range": 225,
+      "bulletCount": 3,
+      "bulletType": 8,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun16-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun16-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 17,
+      "name": "Gun17",
+      "attack": 204,
+      "attackSpeed": 0.6,
+      "range": 230,
+      "bulletCount": 3,
+      "bulletType": 1,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun17-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun17-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 18,
+      "name": "Gun18",
+      "attack": 225,
+      "attackSpeed": 0.55,
+      "range": 235,
+      "bulletCount": 3,
+      "bulletType": 2,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun18-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun18-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 19,
+      "name": "Gun19",
+      "attack": 247,
+      "attackSpeed": 0.55,
+      "range": 240,
+      "bulletCount": 3,
+      "bulletType": 3,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun19-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun19-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    },
+    {
+      "id": 20,
+      "name": "Gun20",
+      "attack": 270,
+      "attackSpeed": 0.5,
+      "range": 245,
+      "bulletCount": 3,
+      "bulletType": 4,
+      "texture": {
+        "idle": "src/assets/tanks/guns/Gun20-Idle_0.png",
+        "shootPattern": "src/assets/tanks/guns/Gun20-Shoot_{index}.png",
+        "shootFrames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+      }
+    }
+  ]
+}

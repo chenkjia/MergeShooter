@@ -1,0 +1,33 @@
+{
+  "types": [
+    { "key": "normal", "base": { "speed": 0.8, "hp": 100, "damage": 10, "gold": 5 } },
+    { "key": "fast",   "base": { "speed": 1.2, "hp": 50,  "damage": 5,  "gold": 5 } },
+    { "key": "tank",   "base": { "speed": 0.6, "hp": 200, "damage": 15, "gold": 10 } },
+    { "key": "ranged", "base": { "speed": 0.8, "hp": 120, "damage": 12, "gold": 8 } },
+    { "key": "exploder","base": { "speed": 0.9, "hp": 80,  "damage": 20, "gold": 12 } }
+  ],
+  "monsters": [
+    { "id": "Monster01", "type": "normal",   "texture": { "pattern": "src/assets/monsters/animations/Monster01/Monster01-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster02", "type": "fast",     "texture": { "pattern": "src/assets/monsters/animations/Monster02/Monster02-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster03", "type": "tank",     "texture": { "pattern": "src/assets/monsters/animations/Monster03/Monster03-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster04", "type": "ranged",   "texture": { "pattern": "src/assets/monsters/animations/Monster04/Monster04-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster05", "type": "exploder", "texture": { "pattern": "src/assets/monsters/animations/Monster05/Monster05-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster06", "type": "normal",   "texture": { "pattern": "src/assets/monsters/animations/Monster06/Monster06-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster07", "type": "fast",     "texture": { "pattern": "src/assets/monsters/animations/Monster07/Monster07-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster08", "type": "tank",     "texture": { "pattern": "src/assets/monsters/animations/Monster08/Monster08-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster09", "type": "ranged",   "texture": { "pattern": "src/assets/monsters/animations/Monster09/Monster09-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster10", "type": "exploder", "texture": { "pattern": "src/assets/monsters/animations/Monster10/Monster10-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] } },
+    { "id": "Monster11", "type": "normal",   "texture": { "pattern": "src/assets/monsters/animations/Monster11/Monster11-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] } },
+    { "id": "Monster12", "type": "fast",     "texture": { "pattern": "src/assets/monsters/animations/Monster12/Monster12-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] } },
+    { "id": "Monster13", "type": "tank",     "texture": { "pattern": "src/assets/monsters/animations/Monster13/Monster13-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] } },
+    { "id": "Monster14", "type": "ranged",   "texture": { "pattern": "src/assets/monsters/animations/Monster14/Monster14-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] } },
+    { "id": "Monster15", "type": "exploder", "texture": { "pattern": "src/assets/monsters/animations/Monster15/Monster15-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] } }
+  ],
+  "bosses": [
+    { "id": "Boss01", "texture": { "pattern": "src/assets/monsters/boss/Boss01/Boss01-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] }, "base": { "speed": 0.7, "hp": 1200, "damage": 30, "gold": 50 }, "growth": { "hpPerBossClear": 0.15, "damagePerBossClear": 0.10 } },
+    { "id": "Boss02", "texture": { "pattern": "src/assets/monsters/boss/Boss02/Boss02-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] }, "base": { "speed": 0.7, "hp": 1500, "damage": 35, "gold": 60 }, "growth": { "hpPerBossClear": 0.15, "damagePerBossClear": 0.10 } },
+    { "id": "Boss03", "texture": { "pattern": "src/assets/monsters/boss/Boss03/Boss03-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] }, "base": { "speed": 0.65, "hp": 1800, "damage": 40, "gold": 70 }, "growth": { "hpPerBossClear": 0.15, "damagePerBossClear": 0.10 } },
+    { "id": "Boss04", "texture": { "pattern": "src/assets/monsters/boss/Boss04/Boss04-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] }, "base": { "speed": 0.65, "hp": 2200, "damage": 45, "gold": 80 }, "growth": { "hpPerBossClear": 0.15, "damagePerBossClear": 0.10 } },
+    { "id": "Boss05", "texture": { "pattern": "src/assets/monsters/boss/Boss05/Boss05-animation_{index}.png", "frames": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24] }, "base": { "speed": 0.6, "hp": 2600, "damage": 50, "gold": 100 }, "growth": { "hpPerBossClear": 0.15, "damagePerBossClear": 0.10 } }
+  ]
+}
