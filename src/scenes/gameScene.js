@@ -129,6 +129,7 @@ const gameScene = {
       drawTankWithBadge(t.x, t.y, t.level, styles.turret.innerSize);
     }
     this.drawMoney();
+    this.drawPlayerHealth();
   },
 
   handleBottomButtonClick(button) {
@@ -183,6 +184,27 @@ const gameScene = {
     if (this.buttonArea && typeof this.buttonArea.onTouchEnd === 'function') {
       this.buttonArea.onTouchEnd(touches);
     }
+  },
+  drawPlayerHealth() {
+    if (!ctx || !this.monsterPathArea) return;
+    const h = this.monsterPathArea.getPlayerHealth();
+    const barW = 140;
+    const barH = 16;
+    const x = systemInfo.windowWidth - barW - 10;
+    const y = 10;
+    const pct = h.max > 0 ? Math.max(0, Math.min(1, h.current / h.max)) : 0;
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(x, y, barW, barH);
+    ctx.fillStyle = '#44ff44';
+    ctx.fillRect(x, y, Math.floor(barW * pct), barH);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, barW, barH);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Helvetica';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${h.current}/${h.max}`, x + barW / 2, y + barH / 2);
   },
   reset() {
     this.isInitialized = false;

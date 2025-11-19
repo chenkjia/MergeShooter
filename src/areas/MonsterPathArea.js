@@ -335,6 +335,10 @@ class MonsterPathArea {
     return this.playerHealth;
   }
 
+  getPlayerHealth() {
+    return { current: this.playerHealth, max: this.maxPlayerHealth };
+  }
+
   /**
    * 创建爆炸效果
    */
