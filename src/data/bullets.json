@@ -1,12 +1,12 @@
 {
   "bullets": [
-    { "id": 1, "aliasKeys": ["bullet_1"], "texture": "src/assets/bullets/1.png", "speed": 420, "radius": 12, "damageScale": 1.0 },
-    { "id": 2, "aliasKeys": ["bullet_2"], "texture": "src/assets/bullets/2.png", "speed": 380, "radius": 12, "damageScale": 1.0 },
-    { "id": 3, "aliasKeys": ["bullet_3"], "texture": "src/assets/bullets/3.png", "speed": 440, "radius": 12, "damageScale": 1.0 },
-    { "id": 4, "aliasKeys": ["bullet_4"], "texture": "src/assets/bullets/4.png", "speed": 360, "radius": 12, "damageScale": 1.0 },
-    { "id": 5, "aliasKeys": ["bullet_5"], "texture": "src/assets/bullets/5.png", "speed": 420, "radius": 12, "damageScale": 1.0 },
-    { "id": 6, "aliasKeys": ["bullet_6"], "texture": "src/assets/bullets/6.png", "speed": 380, "radius": 12, "damageScale": 1.0 },
-    { "id": 7, "aliasKeys": ["bullet_7"], "texture": "src/assets/bullets/7.png", "speed": 440, "radius": 12, "damageScale": 1.0 },
-    { "id": 8, "aliasKeys": ["bullet_8"], "texture": "src/assets/bullets/8.png", "speed": 360, "radius": 12, "damageScale": 1.0 }
+    { "id": 1, "aliasKeys": ["bullet_1"], "texture": "src/assets/bullets/1.png"},
+    { "id": 2, "aliasKeys": ["bullet_2"], "texture": "src/assets/bullets/2.png"},
+    { "id": 3, "aliasKeys": ["bullet_3"], "texture": "src/assets/bullets/3.png"},
+    { "id": 4, "aliasKeys": ["bullet_4"], "texture": "src/assets/bullets/4.png"},
+    { "id": 5, "aliasKeys": ["bullet_5"], "texture": "src/assets/bullets/5.png"},
+    { "id": 6, "aliasKeys": ["bullet_6"], "texture": "src/assets/bullets/6.png"},
+    { "id": 7, "aliasKeys": ["bullet_7"], "texture": "src/assets/bullets/7.png"},
+    { "id": 8, "aliasKeys": ["bullet_8"], "texture": "src/assets/bullets/8.png"}
   ]
 }
