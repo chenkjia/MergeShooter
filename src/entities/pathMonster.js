@@ -143,18 +143,29 @@ class PathMonster {
    * 绘制血条
    */
   drawHealthBar() {
+    const bg = resourceManager.textures.enemy_hp_bar_bg;
+    const fg = resourceManager.textures.enemy_hp_bar_fg;
     const barWidth = this.width;
-    const barHeight = 4;
-    const barY = this.y - this.height/2 - barHeight - 2;
-    
-    // 血条背景
-    ctx.fillStyle = '#333333';
-    ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-    
-    // 当前血量
-    const healthPercent = this.health / this.maxHealth;
-    ctx.fillStyle = healthPercent > 0.5 ? '#44ff44' : healthPercent > 0.25 ? '#ffff44' : '#ff4444';
-    ctx.fillRect(this.x - barWidth/2, barY, barWidth * healthPercent, barHeight);
+    const baseH = (bg && bg.height) ? bg.height : 8;
+    const barHeight = Math.max(4, Math.min(12, baseH));
+    const barY = this.y - this.height / 2 - barHeight - 2;
+    if (bg && bg.width && bg.height) {
+      ctx.drawImage(bg, this.x - barWidth / 2, barY, barWidth, barHeight);
+    } else {
+      ctx.fillStyle = '#333333';
+      ctx.fillRect(this.x - barWidth / 2, barY, barWidth, barHeight);
+    }
+    const pct = Math.max(0, Math.min(1, this.health / this.maxHealth));
+    if (fg && fg.width && fg.height) {
+      const sw = Math.floor(fg.width * pct);
+      const dw = Math.floor(barWidth * pct);
+      if (sw > 0 && dw > 0) {
+        ctx.drawImage(fg, 0, 0, sw, fg.height, this.x - barWidth / 2, barY, dw, barHeight);
+      }
+    } else {
+      ctx.fillStyle = pct > 0.5 ? '#44ff44' : pct > 0.25 ? '#ffff44' : '#ff4444';
+      ctx.fillRect(this.x - barWidth / 2, barY, Math.floor(barWidth * pct), barHeight);
+    }
   }
 
   /**

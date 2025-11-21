@@ -62,6 +62,8 @@ const resources = {
   money_bar: 'src/assets/ui/money_bar.png',
   shield_icon: 'src/assets/ui/buttons/shield_icon.png',
   tank_icon: 'src/assets/ui/buttons/tank_icon.png',
+  enemy_hp_bar_bg: 'src/assets/ui/enemy_hp_bar/bg.png',
+  enemy_hp_bar_fg: 'src/assets/ui/enemy_hp_bar/fg.png',
   
   // 爆炸动画资源（Dead FX），统一管理于 assets 目录
   explosion_00: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_00.png',

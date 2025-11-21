@@ -82,6 +82,14 @@ function main() {
   moveBullets();
   moveGuns();
   moveMonsters();
+  (function moveEnemyHpBar(){
+    const srcBg = path.resolve('doc/User interfaces/enemy hp bar/enemy hp bar bg.png');
+    const srcFg = path.resolve('doc/User interfaces/enemy hp bar/enemy hp bar fg.png');
+    const dstDir = path.resolve('src/assets/ui/enemy_hp_bar');
+    ensureDir(dstDir);
+    moveIfExists(srcBg, path.join(dstDir, 'bg.png'));
+    moveIfExists(srcFg, path.join(dstDir, 'fg.png'));
+  })();
   console.log('Assets moved where present.');
 }
 
