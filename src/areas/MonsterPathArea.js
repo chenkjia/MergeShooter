@@ -247,7 +247,7 @@ class MonsterPathArea {
         }
       }
     }
-    this.allMonsters = nextMonsters;
+    this.allMonsters = this.allMonsters.filter(m => m.isAlive() || m.isDying);
 
     this.fireBullets();
     this.updateBullets(dtSec > 0 ? dtSec : 0.016);
@@ -430,11 +430,8 @@ class MonsterPathArea {
           const dy = m.y - b.y;
           const d = Math.hypot(dx, dy);
           if (d <= (b.radius + Math.max(8, Math.min(m.width, m.height) * 0.25))) {
-            m.takeDamage(b.damage);
+            m.takeDamage(b.damage, 'bullet');
             hit = true;
-            if (!m.isAlive()) {
-              this.createExplosion(m.x, m.y, { scale: 0.6, animationSpeed: 0.08 });
-            }
             break;
           }
         }
@@ -442,12 +439,7 @@ class MonsterPathArea {
       } catch (e) {}
     }
     this.bullets = next;
-    const alive = [];
-    for (let k = 0; k < this.allMonsters.length; k++) {
-      const m = this.allMonsters[k];
-      if (m && m.isAlive() && !m.reachedEnd) alive.push(m);
-    }
-    this.allMonsters = alive;
+    this.allMonsters = this.allMonsters.filter(m => m.isAlive() || m.isDying);
   }
 
   /**

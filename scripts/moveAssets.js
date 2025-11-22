@@ -78,6 +78,18 @@ function moveMonsters() {
   }
 }
 
+function moveShotFx() {
+  const srcBase = path.resolve('doc/Shoot fx');
+  const dstBase = path.resolve('src/assets/effects/shot_death');
+  ensureDir(dstBase);
+  for (let i = 0; i <= 14; i++) {
+    const frame = String(i).padStart(2, '0');
+    const srcFile = path.join(srcBase, `Shoot fx-animation_${frame}.png`);
+    const dstFile = path.join(dstBase, `animation_${frame}.png`);
+    moveIfExists(srcFile, dstFile);
+  }
+}
+
 function main() {
   moveBullets();
   moveGuns();
@@ -90,6 +102,7 @@ function main() {
     moveIfExists(srcBg, path.join(dstDir, 'bg.png'));
     moveIfExists(srcFg, path.join(dstDir, 'fg.png'));
   })();
+  moveShotFx();
   console.log('Assets moved where present.');
 }
 

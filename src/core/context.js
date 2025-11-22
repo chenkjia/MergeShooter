@@ -65,6 +65,23 @@ const resources = {
   enemy_hp_bar_bg: 'src/assets/ui/enemy_hp_bar/bg.png',
   enemy_hp_bar_fg: 'src/assets/ui/enemy_hp_bar/fg.png',
   
+  // 射击死亡动画
+  shot_death_00: 'src/assets/effects/shot_death/animation_00.png',
+  shot_death_01: 'src/assets/effects/shot_death/animation_01.png',
+  shot_death_02: 'src/assets/effects/shot_death/animation_02.png',
+  shot_death_03: 'src/assets/effects/shot_death/animation_03.png',
+  shot_death_04: 'src/assets/effects/shot_death/animation_04.png',
+  shot_death_05: 'src/assets/effects/shot_death/animation_05.png',
+  shot_death_06: 'src/assets/effects/shot_death/animation_06.png',
+  shot_death_07: 'src/assets/effects/shot_death/animation_07.png',
+  shot_death_08: 'src/assets/effects/shot_death/animation_08.png',
+  shot_death_09: 'src/assets/effects/shot_death/animation_09.png',
+  shot_death_10: 'src/assets/effects/shot_death/animation_10.png',
+  shot_death_11: 'src/assets/effects/shot_death/animation_11.png',
+  shot_death_12: 'src/assets/effects/shot_death/animation_12.png',
+  shot_death_13: 'src/assets/effects/shot_death/animation_13.png',
+  shot_death_14: 'src/assets/effects/shot_death/animation_14.png',
+  
   // 爆炸动画资源（Dead FX），统一管理于 assets 目录
   explosion_00: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_00.png',
   explosion_01: 'src/assets/explosions/EnemyDieFx-EnemyDieFx_01.png',
